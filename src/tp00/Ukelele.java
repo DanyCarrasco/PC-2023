@@ -1,3 +1,5 @@
+package tp00;
+
 // Un tipo de Guitarra
 class Ukelele extends Guitarra {
     public void tocar() {

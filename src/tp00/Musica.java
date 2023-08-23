@@ -1,3 +1,5 @@
+package tp00;
+
 public class Musica {
     // No importa el tipo de Instrumento,
 // seguirá funcionando debido a Polimorfismo:

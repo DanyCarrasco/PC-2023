@@ -1,3 +1,5 @@
+package tp00;
+
 // Un tipo de Guitarra
 class Guzla extends Guitarra {
     public void tocar() {

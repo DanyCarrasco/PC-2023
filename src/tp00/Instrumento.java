@@ -1,3 +1,5 @@
+package tp00;
+
 class Instrumento {
     public void tocar() {
         System.out.println("Instrumento.tocar()");
