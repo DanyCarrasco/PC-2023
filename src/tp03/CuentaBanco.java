@@ -1,3 +1,5 @@
+package tp03;
+
 public class CuentaBanco {
     private int balance = 50;
 

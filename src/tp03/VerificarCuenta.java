@@ -1,8 +1,14 @@
+package tp03;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+
 public class VerificarCuenta implements Runnable {
     private CuentaBanco cb = new CuentaBanco();
+
+    public VerificarCuenta(){
+    }
 
     private void HacerRetiro(int cantidad) throws InterruptedException {
         if (cb.getBalance() >= cantidad) {
