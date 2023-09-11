@@ -10,7 +10,7 @@ public class CuentaBanco {
         return balance;
     }
 
-    public /*synchronized*/ void retiroBancario(int retiro)      {
+    public synchronized void retiroBancario(int retiro)      {
         balance = balance - retiro;
     }
 }
