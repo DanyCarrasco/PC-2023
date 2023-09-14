@@ -1,5 +1,4 @@
 package tp02;
-import tp02.MiHilo;
 
 public class UsoHilos {
     //original

@@ -2,8 +2,6 @@ package tp02;
 
 public class testCorredor {
     public static void main(String[] args) {
-        int distMayor = 0;
-        String nombre = "";
         Corredor[] c = new Corredor[10];
         crearCorredores(c);
         Thread[] arreglo = new Thread[10];
