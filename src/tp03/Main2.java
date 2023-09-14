@@ -7,8 +7,8 @@ public class Main2 {
         CriaturaOscura criaturaOscura = new CriaturaOscura(energia);
         Thread sanadorThread = new Thread(sanador, "Sanador");
         Thread criaturaOscuraThread = new Thread(criaturaOscura, "Criatura Oscura");
-        sanadorThread.start();
         criaturaOscuraThread.start();
+        sanadorThread.start();
         //try {
        //     sanadorThread.join();
         //    criaturaOscuraThread.join();
