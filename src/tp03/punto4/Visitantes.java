@@ -1,0 +1,15 @@
+package tp03.punto4;
+
+public class Visitantes implements Runnable{
+    private int num;
+    private Area areaParque;
+
+    public Visitantes(int num, Area areaParque) {
+        this.num = num;
+        this.areaParque = areaParque;
+    }
+
+public void run(){
+}
+    
+}
