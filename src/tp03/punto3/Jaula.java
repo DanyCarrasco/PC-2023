@@ -5,39 +5,54 @@ public class Jaula {
     private Rueda rueda;
     private Hamaca hamaca;
 
-    public Jaula(){
+    public Jaula() {
         plato = new Plato();
         rueda = new Rueda();
         hamaca = new Hamaca();
     }
 
-    public void usarPlato(String nombre){
-        plato.tomarPlato(nombre);
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+    public synchronized boolean usarPlato(String nombre) {
+        boolean exito = false;
+        if (plato.estaDisponible()) {
+            plato.tomarPlato(nombre);
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            plato.soltarPlato(nombre);
+            exito = true;
         }
-        plato.soltarPlato(nombre);
+        return exito;
     }
 
-    public void usarRueda(String nombre){
-        rueda.tomarRueda(nombre);
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+    public synchronized boolean usarRueda(String nombre) {
+        boolean exito = false;
+        if (rueda.estaDisponible()) {
+            rueda.tomarRueda(nombre);
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            rueda.dejarRueda(nombre);
+            exito = true;
         }
-        rueda.dejarRueda(nombre);
+        return exito;
     }
 
-    public void usarHamaca(String nombre){
-        hamaca.tomarHamaca(nombre);
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+    public synchronized boolean usarHamaca(String nombre) {
+        boolean exito = false;
+        if (hamaca.estaDisponible()) {
+            hamaca.tomarHamaca(nombre);
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            hamaca.dejarHamaca(nombre);
+            exito = true;
         }
-        hamaca.dejarHamaca(nombre);
+        return exito;
     }
 }
