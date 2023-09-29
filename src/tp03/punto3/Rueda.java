@@ -1,4 +1,4 @@
-package tp03;
+package tp03.punto3;
 
 public class Rueda {
 

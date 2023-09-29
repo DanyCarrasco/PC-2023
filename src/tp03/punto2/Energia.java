@@ -1,4 +1,4 @@
-package tp03;
+package tp03.punto2;
 
 public class Energia {
     private int energia = 5;

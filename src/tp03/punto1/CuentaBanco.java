@@ -1,4 +1,4 @@
-package tp03;
+package tp03.punto1;
 
 public class CuentaBanco {
     private int balance = 50;

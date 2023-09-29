@@ -1,4 +1,4 @@
-package tp03;
+package tp03.punto1;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;

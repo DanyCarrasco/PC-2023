@@ -1,4 +1,4 @@
-package tp03;
+package tp03.punto2;
 
 public class Sanador implements Runnable{
     private Energia energia;

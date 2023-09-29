@@ -1,4 +1,4 @@
-package tp03;
+package tp03.punto2;
 
 public class Main2 {
     public static void main(String[] args) {
