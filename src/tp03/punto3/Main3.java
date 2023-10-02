@@ -5,13 +5,14 @@ public class Main3 {
         int num = 5;
         Hamster[] h = new Hamster[num];
         Thread[] t = new Thread[num];
-        crearHamsters(h, t, num);
+        Jaula j = new Jaula();
+        crearHamsters(h, t, j, num);
         iniciarHamsters(t);
     }
 
-    private static void crearHamsters(Hamster[] h, Thread[] t, int num) {
+    private static void crearHamsters(Hamster[] h, Thread[] t, Jaula j, int num) {
         for (int i = 0; i < num; i++) {
-            h[i] = new Hamster();
+            h[i] = new Hamster(j);
             t[i] = new Thread(h[i], "Hamster #" + i);
         }
     }

@@ -2,36 +2,42 @@ package tp03.punto3;
 
 public class Jaula {
     private Plato plato;
-    /*private Rueda rueda;
-    private Hamaca hamaca;*/
+    private Rueda rueda;
+    private Hamaca hamaca;
 
     public Jaula(){
         plato = new Plato();
-        /*rueda = new Rueda();
-        hamaca = new Hamaca();*/
+        rueda = new Rueda();
+        hamaca = new Hamaca();
     }
 
-    public synchronized boolean tomaPlato(String nombre){
-        return plato.tomarPlato(nombre);
-    }
-
-    public synchronized void dejaPlato(String nombre){
+    public void usarPlato(String nombre){
+        plato.tomarPlato(nombre);
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         plato.soltarPlato(nombre);
     }
 
-    /*public synchronized void tomaRueda(String nombre){
+    public void usarRueda(String nombre){
         rueda.tomarRueda(nombre);
-    }
-
-    public synchronized void dejaRueda(String nombre){
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         rueda.dejarRueda(nombre);
     }
 
-    public synchronized void tomaHamaca(String nombre){
+    public void usarHamaca(String nombre){
         hamaca.tomarHamaca(nombre);
-    }
-
-    public synchronized void dejaHamaca(String nombre){
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         hamaca.dejarHamaca(nombre);
-    }*/
+    }
 }
