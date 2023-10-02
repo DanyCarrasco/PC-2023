@@ -9,10 +9,24 @@ public class Hamster implements Runnable {
 
     @Override
     public void run() {
-        jaula.usarPlato(Thread.currentThread().getName());
-        jaula.usarRueda(Thread.currentThread().getName());
-        jaula.usarHamaca(Thread.currentThread().getName());
+        jaula.tomaPlato(Thread.currentThread().getName());
+        tiempo();
+        jaula.dejaPlato(Thread.currentThread().getName());
+        /*jaula.tomaRueda(Thread.currentThread().getName());
+        tiempo();
+        jaula.dejaRueda(Thread.currentThread().getName());
+        jaula.tomaHamaca(Thread.currentThread().getName());
+        tiempo();
+        jaula.dejaHamaca(Thread.currentThread().getName());*/
         System.out.println(Thread.currentThread().getName() + " termino");
+    }
+
+    private void tiempo(){
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }
 
