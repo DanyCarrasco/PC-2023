@@ -3,7 +3,7 @@ package tp03.punto3;
 public class Hamster implements Runnable {
     private Jaula jaula;
 
-    public Hamster() {
+    public Hamster(Jaula j) {
         jaula = new Jaula();
     }
 
