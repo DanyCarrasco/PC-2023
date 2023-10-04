@@ -17,7 +17,7 @@ public class Main6 {
         if(resto == 0){
             numTrabajo = numArreglo / numHilos;
         } else {
-
+            numTrabajo = (numArreglo / numHilos) + resto;
         }
     }
 
