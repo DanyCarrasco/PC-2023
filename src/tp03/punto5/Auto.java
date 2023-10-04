@@ -9,7 +9,7 @@ public class Auto extends Vehiculo implements Runnable {
     private int topeKm;
     private Surtidor surtidor;
 
-    public Auto(String marca, String modelo, String patente, int topeKm, Surtidor surtidor) {
+    public Auto(/*String marca, String modelo,*/ String patente, int topeKm, Surtidor surtidor) {
         //this.marca = marca;
         //this.modelo = modelo;
         this.patente = patente;
@@ -25,24 +25,24 @@ public class Auto extends Vehiculo implements Runnable {
         System.out.println("Auto: " + this.patente + ". Listo para salir con " + this.topeKm + " km maximo.");
         System.out.println("Auto: " + this.patente + ". Arrancando.");
         while (numAleatorio <= topeKm) {
-            System.out.println("Auto esta recorriendo la cuidad con " + numAleatorio + " km recorridos.");
+            System.out.println("Auto " + this.patente + " esta recorriendo la cuidad con " + numAleatorio + " km recorridos.");
             numAleatorio++;
             i++;
         }
         System.out.println("Auto " + this.patente + " llega al km maximo de consumo. Va al surtidor para abastecerse de combustible");
         if (surtidor.cargarCombustible(i)) {
-            System.out.println("Pudo cargar " + i + " litros combusible en el surtidor");
+            System.out.println("Auto " + this.patente + " pudo cargar " + i + " litros combusible en el surtidor");
         } else {
-            System.out.println("No pudo cargar " + i + " litros combusible en el surtidor");
+            System.out.println("Auto " + this.patente + " no pudo cargar " + i + " litros combusible en el surtidor");
         }
-        System.out.println("Auto termina su recorrido");
+        System.out.println("Auto " + this.patente + " termina su recorrido");
     }
 
-    private void tiempo(){
+    /*private void tiempo(){
         try {
             Thread.sleep(10);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-    }
+    }*/
 }
