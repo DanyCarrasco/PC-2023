@@ -17,10 +17,11 @@ public class Sumador implements Runnable{
         int maximo = cantSumar + inicio;
         int numSumado = 0;
         while (inicio <= maximo){
-            numSumado = valores[inicio];
+            numSumado = numSumado + valores[inicio];
+            System.out.println(Thread.currentThread().getName()+" suma: "+numSumado);
             inicio++;
         }
-        System.out.println(Thread.currentThread().getName()+" suma "+numSumado);
+        System.out.println(Thread.currentThread().getName()+" suma final: "+numSumado);
         this.sumatoria.sumar(numSumado);
         System.out.println(Thread.currentThread().getName()+" termino");
     }
