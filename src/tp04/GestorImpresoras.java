@@ -17,6 +17,6 @@ public class GestorImpresoras {
         }
     }
 
-    private void usarImpresora()
+    private void usarImpresora(){
     }
 }
