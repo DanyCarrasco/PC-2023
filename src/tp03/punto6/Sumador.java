@@ -13,10 +13,10 @@ public class Sumador implements Runnable{
         this.inicio = inicio;
     }
 
-    public void run(){
+    public void run(){  
         int maximo = cantSumar + inicio;
         int numSumado = 0;
-        while (inicio <= maximo){
+        while (inicio < maximo){
             numSumado = numSumado + valores[inicio];
             System.out.println(Thread.currentThread().getName()+" suma: "+numSumado);
             inicio++;
