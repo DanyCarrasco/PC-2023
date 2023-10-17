@@ -9,7 +9,7 @@ public class Main6 {
         Sumatoria sum = new Sumatoria();
         iniciarArreglo(arregloInt);
         GeneradorSumadores generador = new GeneradorSumadores(numHilos, arregloInt, sum);
-        generador.crearSumadores();
+	      generador.crearSumadores();
         Thread[] hilos = new Thread[numHilos];
         crearHilos(hilos, generador.getArregloSumador());
         iniciarHilos(hilos);
@@ -27,9 +27,9 @@ public class Main6 {
         }
     }
 
-    public static void crearHilos(Thread[] hilos, Sumador[] sum){
+    public static void crearHilos(Thread[] hilos, Sumador[] arregloSumador){
         for (int i = 0; i < hilos.length; i++) {
-            hilos[i] = new Thread(sum[i], "Thread "+i);
+            hilos[i] = new Thread(arregloSumador[i], "Thread "+i);
         }
     }
 
