@@ -4,12 +4,12 @@ import java.util.Random;
 
 public class Main6 {
     public static void main(String[] args) {
-        int numHilos = 3, numArreglo = 10;
+        int numHilos = 100000, numArreglo = 500000;
         int[] arregloInt = new int[numArreglo];
         Sumatoria sum = new Sumatoria();
         iniciarArreglo(arregloInt);
         GeneradorSumadores generador = new GeneradorSumadores(numHilos, arregloInt, sum);
-	generador.crearSumadores();
+	      generador.crearSumadores();
         Thread[] hilos = new Thread[numHilos];
         crearHilos(hilos, generador.getArregloSumador());
         iniciarHilos(hilos);
@@ -22,13 +22,12 @@ public class Main6 {
         Random rand = new Random();
         for (int i = 0; i < arreglo.length; i++) {
             num = (rand.nextInt(10) + 1);
-            System.out.println("Agrega "+ num);
+            System.out.println("Agrega "+ num+ " en "+ i);
             arreglo[i] = num;
         }
     }
 
     public static void crearHilos(Thread[] hilos, Sumador[] arregloSumador){
-
         for (int i = 0; i < hilos.length; i++) {
             hilos[i] = new Thread(arregloSumador[i], "Thread "+i);
         }
