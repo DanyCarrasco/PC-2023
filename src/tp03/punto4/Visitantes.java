@@ -4,7 +4,7 @@ public class Visitantes implements Runnable{
     private int num;
     private Area areaParque;
 
-    public Visitantes(int num, Area areaParque) {
+    public Visitantes(Area areaParque, int num) {
         this.num = num;
         this.areaParque = areaParque;
     }

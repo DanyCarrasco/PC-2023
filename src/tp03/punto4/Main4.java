@@ -2,7 +2,7 @@ package tp03.punto4;
 
 public class Main4 {
     public static void main(String[] args) {
-        Area area = new Area(10);
+        Area area = new Area("Area 1",10);
 
         Thread Visitantes1 = new Thread(new Visitantes(area, 5));
         Thread Visitantes2 = new Thread(new Visitantes(area, 3));

@@ -4,7 +4,7 @@ public class Area {
     private int cantVisitantes;
     private String nombre;
 
-    public void Area(String nombre, int cant) {
+    public Area(String nombre, int cant) {
         this.nombre = nombre;
         this.cantVisitantes = cant;
     }
