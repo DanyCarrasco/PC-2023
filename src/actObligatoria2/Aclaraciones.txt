@@ -1,0 +1,5 @@
+Aclaraciones
+Se tomo en cuenta los casos donde:
+*cantGatos es igual a 3, canterros es igual a 3 y la capacidad es 2
+*cantGatos es igual a 6, canterros es igual a 6 y la capacidad es 5
+*cantGatos es igual a 22, canterros es igual a 22 y la capacidad es 20
