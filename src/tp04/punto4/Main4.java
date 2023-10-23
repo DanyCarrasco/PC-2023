@@ -1,4 +1,4 @@
-package tp04;
+package punto4;
 
 public class Main4 {
     public static void main(String[] args) {

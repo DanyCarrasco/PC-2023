@@ -1,4 +1,4 @@
-package tp04;
+package punto4;
 
 import java.util.concurrent.Semaphore;
 
