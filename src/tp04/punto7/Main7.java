@@ -5,7 +5,7 @@ public class Main7 {
         int k = 5;
         Confiteria lugar = new Confiteria();
         Empleado[] empleados= new Empleado[k];
-        Mozo mozo = new Mozo(lugar);
+        Mozo mozo = new Mozo(lugar, k);
         Thread[] hilosEmpleados= new Thread[k];
         Thread hiloMozo = new Thread(mozo);
         hiloMozo.start();
