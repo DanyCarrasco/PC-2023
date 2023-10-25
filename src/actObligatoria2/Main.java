@@ -2,7 +2,7 @@ package actObligatoria2;
 
 public class Main {
     public static void main(String[] args) {
-        int cantGato = 22, cantPerro = 22, capacidad = 20;
+        int cantGato = 4, cantPerro = 5, capacidad = 3;
         int total = cantPerro + cantGato;
         Comedor comedor = new Comedor(capacidad);
         Animal[] animal = new Animal[total];
