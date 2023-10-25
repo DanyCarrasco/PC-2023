@@ -1,0 +1,27 @@
+Los Pollos Hermanos II
+
+
+(Recordar el ejercicio del práctico anterior) A la empresa “Los Pollos Hermanos” le va
+muy bien y decide ampliar el espacio de comidas de forma de ofrecer a sus empleados más
+opciones. Es por ello que agregan un cocinero, se mantiene el mozo y ahora hay espacio
+para 2 empleados.
+
+El mozo se encarga de servir bebidas y el cocinero se encarga de la comida. Cuando un
+empleado desea comer o tomar algo se acerca al comedor. Puede elegir: solo tomar algo,
+solo comer, o tomar algo y comer. En este último caso debe ser atendido primero por el
+mozo y recién cuando consigue su bebida puede solicitar la comida.
+
+Cuando se acerca al comedor si existe algún lugar libre se queda, e indica al mozo que está
+allí para que le sirvan, y espera pacientemente que le sirvan la bebida. Cuando le han
+servido, le indican que puede continuar y solicitar la comida al cocinero.
+
+El cocinero prepara la comida y le avisa cuando está lista, mientras el
+empleado espera. El empleado come y cuando termina deja el lugar libre y vuelve a
+trabajar.
+
+Cuando no hay empleados que atender el cocinero aprovecha a ordenar su cocina y probar
+nuevas recetas, y el mozo continúa con su hobby.
+    a. Identificar los objetos activos y los recursos compartidos en el escenario
+    presentado.
+    b. Dar una solución utilizando semáforos que modele el comportamiento
+    explicado.
