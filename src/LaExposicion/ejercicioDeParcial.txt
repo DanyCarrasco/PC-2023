@@ -1,0 +1,19 @@
+Ejercicio 1: La Exposición.
+
+Se realiza una exposición de cuadros en una sala de un museo muy importante. A la sala pueden ingresar 3 tipos de personas:
+• los visitantes, que van a disfrutar de los cuadros,
+• los responsables de la sala, que se ocupan de controlar que todo esté en orden.
+• Los criticos, que son los encargados de analizar las obras y hacer su critica
+
+Existen cierta restricciones impuestas por el director del museo:
+• Los visitantes pueden ingresar cuando haya otros visitantes.
+• Los responsables del control ingresan periódicamente, siempre que no haya en la sala otro responsable del control. 
+  Si puede haber visitantes.
+• Los críticos tienen exclusividad, es decir deben estar solos en la sala, 
+  porque deben hacer su critica sin ser influenciados por nadie. 
+  Las criticas se irán agregando a una colección de criticas
+• Si un critico quiere entrar y hay visitantes y/o personal de control, debe esperar a que se vacie la sala. 
+  Es decir que cuando hay un critico esperando, no pueden entrar visitantes ni personal de control.
+• La capacidad de la sala es para k visitantes
+
+Se requiere simular la situación planteada.
