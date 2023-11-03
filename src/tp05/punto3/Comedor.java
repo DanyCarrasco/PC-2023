@@ -7,6 +7,7 @@ public class Comedor {
     private Semaphore maximoPerros;
     private Semaphore maximoGatos;
     private Semaphore mutex;
+    private boolean primerTurno;
     private int platos, perrosComiendo, gatosComiendo, perrosEsperando, gatosEsperando, cantMaxima;
 
     public Comedor(int cantidad) {
@@ -20,17 +21,10 @@ public class Comedor {
         this.gatosComiendo = 0;
         this.perrosEsperando = 0;
         this.gatosEsperando = 0;
+        this.primerTurno = true;
     }
 
-    public void entrar(String tipo) {
-        if (tipo.equals("Perro")) {
-            entraPerro();
-        } else {
-            entraGato();
-        }
-    }
-
-    private void entraPerro() {
+    public void entraPerro() {
         try {
             if (perrosComiendo == 0) {
                 // Si es el primer perro, libera los permisos de la "sala de espera" de perros
@@ -58,7 +52,7 @@ public class Comedor {
         }
     }
 
-    private void entraGato() {
+    public void entraGato() {
         try {
             if (gatosComiendo == 0) {
                 // Si es el primer gato, libera los permisos de la "sala de espera" de gatos
@@ -86,16 +80,9 @@ public class Comedor {
         } catch (InterruptedException e) {
         }
     }
+    
 
-    public void salir(String tipo) {
-        if (tipo.equals("Perro")) {
-            salePerro();
-        } else {
-            saleGato();
-        }
-    }
-
-    private void salePerro() {
+    public void salePerro() {
         try {
             this.mutex.acquire();
             this.perrosComiendo--;
@@ -126,7 +113,7 @@ public class Comedor {
         }
     }
 
-    private void saleGato() {
+    public void saleGato() {
         try {
             this.mutex.acquire();
             this.gatosComiendo--;
