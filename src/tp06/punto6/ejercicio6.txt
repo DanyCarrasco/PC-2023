@@ -1,0 +1,1 @@
+Modifique el programa para que el buffer sea ilimitado.

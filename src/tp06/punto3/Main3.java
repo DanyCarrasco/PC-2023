@@ -1,22 +1,16 @@
+package tp06.punto3;
+
+
 public class Main3 {
     public static void main(String[] args) {
-        int numConsumidor = 3, numProductor=3, limiteBuffer =2;
-        BufferMonitores buffer = new BufferMonitores(limiteBuffer);
-        Productor[] productores = new Productor[numProductor];
-        Consumidor[] consumidores = new Consumidor[numConsumidor];
-        Thread[] hilosP = new Thread[numProductor];
-        Thread[] hilosC = new Thread[numConsumidor];
-
-        for (int index = 0; index < numProductor; index++) {
-            productores[index] = new Productor(buffer);
-            hilosP[index] = new Thread(productores[index], "Productor "+i);
-            hilosP[index].start();
-        }
-
-        for (int i = 0; i < numConsumidor; i++) {
-            consumidores[i] = new Consumidor(buffer);
-            hilosC = new Thread(consumidores[i], "Consumidor "+i);
-            hilosC[i].start();
+        int cantEstudiantes = 5, limiteSala = 2;
+        ControlSalaEstudio sala = new ControlSalaEstudio(limiteSala);
+        Estudiante[] estudiantes = new Estudiante[cantEstudiantes];
+        Thread[] hilosEstudiantes = new Thread[cantEstudiantes];
+        for (int j = 0; j < cantEstudiantes; j++) {
+            estudiantes[j] = new Estudiante(sala);
+            hilosEstudiantes[j] = new Thread(estudiantes[j], "Estudiante " + j);
+            hilosEstudiantes[j].start();
         }
     }
 }

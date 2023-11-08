@@ -1,0 +1,17 @@
+Los programadores y los recursos
+
+
+Imagina un grupo de programadores que trabajan juntos en un proyecto de software. Cada
+programador necesita acceder a dos recursos: una computadora portátil para escribir código y un
+libro de referencia para consultar información técnica. Los programadores pasan su tiempo
+escribiendo código y consultando el libro de referencia para resolver problemas y mejorar el
+proyecto. Sin embargo, el acceso a los recursos es limitado, y los programadores deben
+coordinarse para evitar conflictos. Diseña un programa en Java que modele la interacción entre los
+programadores y los recursos (computadoras portátiles y libros de referencia) utilizando Locks y
+Condiciones teniendo en cuenta que cada programador necesita tomar una computadora portátil y
+un libro de referencia para trabajar en el proyecto. Los programadores deben esperar si no hay
+suficientes recursos disponibles.
+
+Implementa el programa de manera que los programadores puedan acceder a las computadoras
+portátiles y los libros de referencia de manera segura y eficiente para trabajar en el proyecto de
+software.

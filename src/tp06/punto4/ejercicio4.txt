@@ -1,0 +1,16 @@
+Productores y Consumidores con Almacén Limitado
+
+
+Diseña un programa en Java que implemente el clásico problema de Productor y Consumidor
+utilizando monitores.
+
+Imagina un almacén con una capacidad limitada, donde el productor coloca productos y el
+consumidor retira productos del almacén. El productor puede colocar un producto a la vez y el
+consumidor puede retirar un producto a la vez. Si el almacén está lleno, el productor debe esperar
+hasta que haya espacio disponible. Si el almacén está vacío, el consumidor debe esperar hasta que
+haya productos disponibles.
+
+Implementa el programa de manera que los productores generen productos y los coloquen en el
+almacén, mientras que los consumidores retiran los productos. Puedes utilizar salidas en la consola
+para mostrar las acciones de los productores y consumidores, así como el estado del almacén.
+Debes asegurar la exclusión mutua y la sincronización adecuada.

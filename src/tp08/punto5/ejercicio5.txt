@@ -1,0 +1,12 @@
+Los caníbales comensales
+
+
+En una tribu de caníbales todos comen de la misma olla, la cual puede albergar N raciones de
+comida. Cuando un caníbal quiere comer, simplemente se sirve de la ollaSemaforos común, a no ser que esté
+vacía. En ese caso, el caníbal despierta al cocinero de la tribu y espera hasta que este haya
+rellenado la olla. En este problema, los eventos de sincronización son dos: Si un caníbal que quiere
+comer se encuentra con la olla vacía, entonces debe notificar al cocinero para que éste cocine.
+Cuando el cocinero termina de cocinar, llena la olla con N raciones y se lo notifica al caníbal que
+lo había despertado previamente.
+
+Nota: Este ejercicio fue tomado en un parcial/recuperatorio.

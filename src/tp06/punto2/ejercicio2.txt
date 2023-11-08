@@ -1,0 +1,26 @@
+Control de Acceso a una Sala de Estudio
+
+
+Imagina una sala de estudio en una biblioteca universitaria con un número limitado de mesas
+disponibles para los estudiantes. Para asegurarse de que los estudiantes tengan un lugar para
+estudiar y evitar la sobrecarga de la sala, se implementará un sistema de control de acceso
+utilizando monitores.
+La sala de estudio tiene un límite máximo de mesas y se representa como un recurso compartido.
+Los estudiantes llegan a la sala y desean ocupar una mesa para estudiar. El monitor de control se
+encarga de regular el acceso a la sala de la siguiente manera:
+
+a.
+Si hay mesas disponibles en la sala, un estudiante puede ocupar una mesa.
+
+b.
+Si todas las mesas están ocupadas, el estudiante debe esperar hasta que una mesa esté
+disponible.
+
+c.
+Cuando un estudiante sale de la sala, su mesa se vuelve disponible para otro
+estudiante que está esperando afuera.
+
+Diseña un programa en el que los estudiantes lleguen a la sala de estudio y deseen ocupar una
+mesa. Si hay mesas disponibles, el estudiante ocupa una mesa y estudia. Si todas las mesas están
+ocupadas, el estudiante debe esperar afuera hasta que haya una mesa disponible.
+Utiliza monitores para garantizar un acceso ordenado y sincronizado a la sala de estudio.
