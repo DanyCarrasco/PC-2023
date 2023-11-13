@@ -1,0 +1,25 @@
+Observatorio.
+
+
+Se realiza una visita al observatorio de la ciudad. El mismo permite el ingreso de visitantes,
+personal de mantenimiento e investigadores.
+
+• los visitantes, que van a estudiar las estrellas,
+• las personas de mantenimiento, que se ocupan de controlar que todo esté aseado,
+• Los investigadores analizan estrellas y realizan su trabajo de investigación.
+
+La sala tiene capacidad para 50 personas, pero si entra algún visitante en silla de ruedas, la
+capacidad baja a 30 personas hasta que se retire. Cuando se retira, la capacidad vuelve a ser de 50
+personas. Puede ocurrir que el visitante quiera ingresar cuando la capacidad sea mayor a 30, en ese
+caso debe esperar a que la capacidad disminuya.
+Existen cierta restricciones impuestas por el director del observatorio:
+
+• Los visitantes pueden ingresar cuando haya otros visitantes, siempre que no superen la
+capacidad.
+• Las personas de mantenimiento ingresan periódicamente, siempre que no haya visitantes,
+aunque sí puede haber otras personas de mantenimiento.
+• Los investigadores tienen exclusividad, es decir deben estar solos en el recinto ya que se
+tienen que concentrar para realizar sus observaciones. Las observaciones deben ser
+guardadas en el libro de observaciones diarias.
+• Si un investigador quiere entrar y hay visitantes y/o personal de mantenimiento, debe
+esperar a que se retiren.

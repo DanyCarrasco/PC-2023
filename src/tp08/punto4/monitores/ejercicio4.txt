@@ -1,0 +1,12 @@
+Centro de hemoterapia.
+
+
+En un centro de hemoterapia se reciben donaciones de sangre. Para realizar las extracciones, que
+toman un tiempo aleatorio, se cuenta con 4 camillas. Las personas que llegan a donar sangre son
+atendidas en orden de llegada, pero mientras no haya camillas libres esperan en la sala de espera,
+pueden optar por utilizar las sillas o esperar parados.
+En la sala de espera hay 9 revistas “Muy Interesante” que las personas leen mientras esperan su
+turno y un televisor sin audio sintonizado en el canal crónica-tv. Los donantes siempre prefieren
+leer una revista, pero si no hay ninguna disponible miran el noticiero. Cuando se libera una camilla
+se llama a la siguiente persona en la sala de espera, quien deja la revista si tenía una. Ni bien una
+revista es liberada las personas mirando el televisor compiten por tomarla.

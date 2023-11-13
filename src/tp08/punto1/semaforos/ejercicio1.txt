@@ -1,0 +1,15 @@
+Cuartel de soldados.
+
+En un cuartel hay un comedor para 100 soldados. Cuando el soldado quiere almorzar, entra en el
+recinto y toma una bandeja con comida de uno de los 5 mostradores (mostradorAlmuerzo) que
+existen para tal efecto; la bandeja, además de la comida, tiene un vaso de agua o una botella de
+gaseosa, si escoge esto último necesita uno de los 10 abridores para poder abrirla. En el caso que el
+soldado quiera postre, debe dirigirse a uno de los 3 mostradores que lo despachan
+(mostradorPostre). Cuando el soldado termina de comer, deja la bandeja en la cocina y se va.
+a.
+Realizar un programa concurrente de forma que utilizando algún mecanismo de sincronización
+coordine las tareas de los soldados.
+b.
+Considere ahora que hay menos soldados (por ejemplo 50, 30, 10) y cambia la cantidad de
+mostradores, en cada ejecución probar con distintos valores. Aplicar la misma idea para los
+abridores.
