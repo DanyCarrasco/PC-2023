@@ -2,7 +2,7 @@ package tp03.punto5;
 
 import java.util.Random;
 
-public class Auto extends Vehiculo implements Runnable {
+public class Auto extends Thread {
     //private String marca;
     //private String modelo;
     private String patente;

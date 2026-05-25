@@ -11,33 +11,48 @@ public class Jaula {
         hamaca = new Hamaca();
     }
 
-    public void usarPlato(String nombre){
-        plato.tomarPlato(nombre);
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+    public synchronized boolean usarPlato(String nombre) {
+        boolean hecho = false;
+        if (plato.estaDisponible()) {
+            plato.tomarPlato(nombre);
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            plato.soltarPlato(nombre);
+            hecho = true;
         }
-        plato.soltarPlato(nombre);
+        return hecho;
     }
 
-    public void usarRueda(String nombre){
-        rueda.tomarRueda(nombre);
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+    public synchronized boolean usarRueda(String nombre) {
+        boolean hecho = false;
+        if (rueda.estaDisponible()) {
+            rueda.tomarRueda(nombre);
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            rueda.dejarRueda(nombre);
+            hecho = true;
         }
-        rueda.dejarRueda(nombre);
+        return hecho;
     }
 
-    public void usarHamaca(String nombre){
-        hamaca.tomarHamaca(nombre);
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+    public synchronized boolean usarHamaca(String nombre) {
+        boolean hecho = false;
+        if (hamaca.estaDisponible()) {
+            hamaca.tomarHamaca(nombre);
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            hamaca.dejarHamaca(nombre);
+            hecho = true;
         }
-        hamaca.dejarHamaca(nombre);
+        return hecho;
     }
 }
