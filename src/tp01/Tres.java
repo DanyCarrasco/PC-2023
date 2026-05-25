@@ -1,5 +1,7 @@
 package tp01;
 
+import java.io.IOException;
+
 public class Tres {
     private static int metodo() {
         int valor = 0;
