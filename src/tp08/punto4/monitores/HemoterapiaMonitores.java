@@ -1,11 +1,11 @@
 package tp08.punto4.monitores;
 
 public class HemoterapiaMonitores {
-    private int cantRevistas, cantCamillasDisponible;
+    private int cantRevistas, cantCamillasOcupadas;
 
     public HemoterapiaMonitores() {
-        cantRevistas = 9;
-        cantCamillasDisponible = 0;
+        cantRevistas = 4;
+        cantCamillasOcupadas = 0;
     }
 
     public synchronized void ingresarExtraccion() {
@@ -14,7 +14,7 @@ public class HemoterapiaMonitores {
             cantRevistas--;
             tieneRevista = true;
         }
-        while (cantCamillasDisponible == 4) {
+        while (cantCamillasOcupadas == 4) {
             if (tieneRevista) {
                 System.out.println(Thread.currentThread().getName() + " ESPERA mirando una revista");
             } else {
@@ -29,11 +29,11 @@ public class HemoterapiaMonitores {
         if (tieneRevista){
             cantRevistas++;
         }
-        cantCamillasDisponible++;
+        cantCamillasOcupadas++;
     }
 
     public synchronized void dejarExtraccion(){
-        cantCamillasDisponible--;
+        cantCamillasOcupadas--;
         this.notifyAll();
     }
 }
