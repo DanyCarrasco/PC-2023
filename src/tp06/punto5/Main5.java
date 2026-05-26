@@ -2,7 +2,7 @@ package tp06.punto5;
 
 public class Main5 {
     public static void main(String[] args) {
-        int numConsumidor = 5, numProductor = 4, limiteBuffer = 2;
+        int numConsumidor = 5, numProductor = 5, limiteBuffer = 2;
         BufferMonitores buffer = new BufferMonitores(limiteBuffer);
         Productor[] productores = new Productor[numProductor];
         Consumidor[] consumidores = new Consumidor[numConsumidor];
