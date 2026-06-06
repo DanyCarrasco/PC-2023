@@ -33,7 +33,10 @@ public class Pasajero implements Runnable {
             }
             puesto.salirPuesto();
 
-            if(tienda.ingresarFreeShop(tiempoMaxEspera)){
+            // Ingresa a transporte publico y se dirige a la terminal, lo que le consume 15 segundos
+            
+            // En la terminal, intenta entrar al Free Shop con su boleto de Terminal
+            /*if(tienda.ingresarFreeShop(tiempoMaxEspera)){
                 if(comprar){
                     tienda.comprarEnFreeShop();
                 } else {
@@ -41,7 +44,7 @@ public class Pasajero implements Runnable {
                 }
             } else {
                 System.out.println(Thread.currentThread().getName()+ " no pudo entrar porque no habia lugar en tiempo maximo permitido");
-            }
+            }*/
         } catch (Exception e) {
             // TODO: handle exception
         }
