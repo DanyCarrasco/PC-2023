@@ -4,67 +4,76 @@ import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.Semaphore;
 
 public class TransporteATerminal {
-    // metodo para que pasajero suba
-    // metodo para que conductor empiece a conducir
-    // metodo para avisar a que terminal llegaron
-    // metodo para que pasajero baje en su terminal, despues de que el conductor
-    // avise que llegaron a la terminal
-    // metodo para volver al inicio
-
-    // Implementa un sistema de terminales en base a int,
-    // pero debo cambiarlo por uno de String.
-
     private CyclicBarrier barrera;
     private Runnable accionInicio;
-    private Semaphore mutex, maximoPasajeros;
-    private Semaphore[] pasajerosDeTerminal;
-
-    private int paradaTerminal = 0, cantTerminales;
+    private final Semaphore mutex;
+    private final Semaphore maximoPasajeros;
+    private final Semaphore[] pasajerosDeTerminal;
+    private final Semaphore[] barreraTerminal; // sincroniza salida por terminal
+    private int paradaTerminal = 0;
+    private final int cantTerminales;
+    private int pasajerosAbordo = 0;
 
     public TransporteATerminal(int cantidad, int cantidadTerminales) {
         this.accionInicio = avisarConductor();
         this.barrera = new CyclicBarrier(cantidad, accionInicio);
-        this.mutex = new Semaphore(1);
-        this.maximoPasajeros = new Semaphore(cantidad);
+        this.mutex = new Semaphore(1, true);
+        this.maximoPasajeros = new Semaphore(cantidad, true);
         this.cantTerminales = cantidadTerminales;
         this.pasajerosDeTerminal = new Semaphore[cantidadTerminales];
+        this.barreraTerminal = new Semaphore[cantidadTerminales];
         for (int i = 0; i < cantidadTerminales; i++) {
-            pasajerosDeTerminal[i] = new Semaphore(0);
+            this.pasajerosDeTerminal[i] = new Semaphore(0, true);
+            this.barreraTerminal[i] = new Semaphore(0, true);
         }
     }
 
-    public void subirATransporte(int numeroTerminal) {
+    // Pasajero sube al transporte
+    public void subirATransporte(int numeroTerminal) throws InterruptedException {
         System.out.println(Thread.currentThread().getName() + " intenta subir al transporte");
-        try {
-            maximoPasajeros.acquire();
-            System.out.println(Thread.currentThread().getName() + " sube al transporte");
-            barrera.await();
-            pasajerosDeTerminal[numeroTerminal - 1].release();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        maximoPasajeros.acquire();
+        System.out.println(Thread.currentThread().getName() + " sube al transporte");
+
+        // El pasajero avisa que va a esta terminal (semáforo destino)
+        pasajerosDeTerminal[numeroTerminal - 1].release();
+
+        // Espera a que el transporte arranque (todos los cupos llenos)
+        barrera.await();
     }
 
-    public void bajarDelTransporte(int numeroTerminal) throws InterruptedException {
-        // cuando el conducto avisa que llego a su parada, se baja
+    // Conductor llega a una parada
+    public void llegadaParada(int parada) throws InterruptedException {
         mutex.acquire();
-        if (paradaTerminal == numeroTerminal) {
-            System.out.println(Thread.currentThread().getName() + " baja del transporte en la terminal "
-                    + cadenaTerminal(numeroTerminal));
-            pasajerosDeTerminal[numeroTerminal - 1].acquire();
-            maximoPasajeros.release();
-        } else {
-            System.out.println(Thread.currentThread().getName() + " espera su parada para bajar del transporte");
+        try {
+            this.paradaTerminal = parada;
+            System.out.println(Thread.currentThread().getName()
+                    + " llega a la parada " + cadenaTerminal(parada));
+        } finally {
+            mutex.release();
         }
-        mutex.release();
     }
 
-    public void llegadaParada(int parada) {
-        try {
+    // Pasajero baja cuando es su parada
+    public void bajarDelTransporte(int numeroTerminal) throws InterruptedException {
+        // Espera bloqueante hasta que sea su parada
+        while (true) {
             mutex.acquire();
-            this.paradaTerminal = parada;
-        } catch (Exception e) {
-            // TODO: handle exception
+            try {
+                if (paradaTerminal == numeroTerminal) {
+                    break; // salir del while, mantener mutex
+                }
+            } finally {
+                mutex.release();
+            }
+            // No es su parada: espera un poco y reintenta
+            Thread.sleep(50);
+        }
+        // Aquí tenemos el mutex tomado y es nuestra parada
+        try {
+            System.out.println(Thread.currentThread().getName()
+                    + " baja del transporte en la terminal " + cadenaTerminal(numeroTerminal));
+            pasajerosDeTerminal[numeroTerminal - 1].acquire(); // espera que el conductor confirme
+            maximoPasajeros.release(); // libera el cupo
         } finally {
             mutex.release();
         }
