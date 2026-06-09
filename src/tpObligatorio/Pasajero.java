@@ -4,14 +4,20 @@ public class Pasajero implements Runnable {
     private String[] boletoAvion;
     private String[] boletoTerminal;
     private PuestoAtencion puesto;
+
+    private TransporteATerminal transporte;
+
     private FreeShop tienda;
     private boolean comprar;
 
-    public Pasajero(PuestoAtencion puesto, FreeShop tienda, boolean comprar) {
+    public Pasajero(PuestoAtencion puesto, TransporteATerminal transporte, FreeShop tienda, boolean comprar) {
         this.boletoAvion = new String[1];
         boletoAvion[0] = "Compañia 1";
         this.boletoTerminal = new String[0];
         this.puesto = puesto;
+
+        this.transporte = transporte;
+
         this.tienda = tienda;
         this.comprar = comprar;
     }
@@ -34,7 +40,8 @@ public class Pasajero implements Runnable {
             puesto.salirPuesto();
 
             // Ingresa a transporte publico y se dirige a la terminal, lo que le consume 15 segundos
-            
+            this.transporte.subirATransporte(numeroTerminal());
+            this.transporte.bajarDelTransporte(numeroTerminal());
             // En la terminal, intenta entrar al Free Shop con su boleto de Terminal
             /*if(tienda.ingresarFreeShop(tiempoMaxEspera)){
                 if(comprar){
@@ -48,5 +55,9 @@ public class Pasajero implements Runnable {
         } catch (Exception e) {
             // TODO: handle exception
         }
+    }
+
+    private int numeroTerminal(){
+        return (int) ('@' - boletoTerminal[0].charAt(0));
     }
 }

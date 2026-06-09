@@ -23,15 +23,17 @@ public class prueba {
         guardia2.start();
         empleado2.start();
 
+        TransporteATerminal transporte = new TransporteATerminal(5, cantidadTerminales);
+
         FreeShop tienda = new FreeShop("A", 3);
-        Thread cajero = new Thread((new Cajero (tienda)), "Cajero");
-        cajero.start();
+        // Thread cajero = new Thread((new Cajero (tienda)), "Cajero");
+        // cajero.start();
 
         for (int i = 0; i < cantPasajeros; i++) {
             if (i % 2 == 0){
-                (new Thread((new Pasajero(puesto2, tienda, true)), "Pasajero #" + i)).start();
+                (new Thread((new Pasajero(puesto2, transporte, tienda, true)), "Pasajero #" + i)).start();
             } else {
-                (new Thread((new Pasajero(puesto, tienda, false)), "Pasajero #" + i)).start();
+                (new Thread((new Pasajero(puesto, transporte, tienda, false)), "Pasajero #" + i)).start();
             }
         }
     }

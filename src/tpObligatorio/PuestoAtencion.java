@@ -110,7 +110,7 @@ public class PuestoAtencion {
     // ----------- Generación de boleto (no synchronized, solo lee estado) -----------
     private void crearBoletoTerminal() {
         String[] boleto = new String[2];
-        int numeroTerminal = (int) (Math.random() * cantidadTerminal);
+        int numeroTerminal = (int) (Math.random() * (cantidadTerminal-1));
         boleto[0] = Character.toString('A' + numeroTerminal);
         int puertoTerminal = (int) (Math.random()
                 * (tamanioPE[numeroTerminal][1] - tamanioPE[numeroTerminal][0] + 1))
