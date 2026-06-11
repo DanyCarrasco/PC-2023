@@ -7,15 +7,15 @@ public class PuestoAtencion {
     private int cantidadTerminal;
     private int[][] tamanioPE; // PE: Puertos de Embarques
 
-    // Capacidad máxima de pasajeros simultáneos (lo único que justifica un contador)
+    // Capacidad máxima de pasajeros simultáneos (lo único que justifica un
+    // contador)
     private int maxPasajeros;
-    private int pasajerosActuales = 0;
 
-    // Estado del monitor
-    private boolean guardiaDisponible = true;
-    private boolean pasajeroEsperando = false;
+    private int activos; // pasajaros actualmente dentro del puesto
+    private int esperando; // pasajeros esperando permiso del guardia
+    private boolean liberado; // permiso concedido a un pasajero especifico
+
     private boolean intercambioEnCurso = false;
-
     private final Exchanger<String[]> exchanger = new Exchanger<>();
     private String[] boletoTerminal;
 
@@ -24,53 +24,57 @@ public class PuestoAtencion {
         this.cantidadTerminal = cantidadTerminales;
         this.tamanioPE = tamanioPE;
         this.maxPasajeros = cantidadMaxima;
+        this.activos = 0;
+        this.esperando = 0;
+        this.liberado = false;
         this.boletoTerminal = new String[2];
     }
 
     // ----------- PASAJERO: pedir ingreso -----------
+    // Llamado por el pasajero para solicitar ingreso (bloquea hasta que el guardia
+    // le dé el permiso)
     public synchronized void puedeEntrarPuesto() throws InterruptedException {
+        esperando++;
         System.out.println(Thread.currentThread().getName()
-                + " intenta ingresar al puesto de atencion de " + nombre);
+                + " espera para ingresar al puesto de atencion de " + nombre);
 
-        // Espera a que el guardia esté libre
-        while (!guardiaDisponible) {
-            wait();
+        try {
+            while (!liberado) {
+                wait();
+            }
+            // Consume el permiso
+            liberado = false;
+            // Control de capacidad: el guardia ya verifico que activos < maxPasajeros
+            activos++;
+        } finally {
+            esperando--;
         }
-        guardiaDisponible = false;
-
-        // Queda registrado que hay un pasajero pidiendo entrar
-        pasajeroEsperando = true;
-        notifyAll(); // despierta al guardia
+        System.out.println(Thread.currentThread().getName() + " ingresa al puesto de atencion de " + nombre);
     }
 
     // ----------- GUARDIA: dar permiso -----------
+    // Llamado por el guardia para permitir la entrada de un pasajero (si hay
+    // esperando y cupo)
     public synchronized void permitirIngreso() throws InterruptedException {
-        // Espera hasta que haya un pasajero pidiendo entrar
-        while (!pasajeroEsperando) {
+        while (esperando == 0 || activos >= maxPasajeros) {
             wait();
         }
-        pasajeroEsperando = false;
-
-        // Limita la cantidad de pasajeros simultáneos en el puesto
-        while (pasajerosActuales >= maxPasajeros) {
-            wait();
-        }
-        pasajerosActuales++;
-
-        guardiaDisponible = true;
-        System.out.println(Thread.currentThread().getName() + " ingresa a un pasajero");
-        notifyAll(); // despierta al pasajero que esperaba entrar
+        liberado = true;
+        notify(); // despierta a un pasajero que estaba esperando permiso
+        System.out.println(Thread.currentThread().getName() + " da permiso a un pasajero");
     }
 
     // ----------- PASAJERO: salir del puesto -----------
+    // Llamado por el pasajero al salir del puesto
     public synchronized void salirPuesto() {
+        activos--;
         System.out.println(Thread.currentThread().getName()
                 + " sale del puesto de atencion de pasajeros de " + nombre);
-        pasajerosActuales--;
-        notifyAll();
+        notifyAll(); // despierta al guardia por si estaba esperando cupo
     }
 
     // ----------- PASAJERO: pedir intercambio de boleto -----------
+    // Intercambio de boleto (usado por pasajero)
     public String[] realizarIntercambio(String[] boletoAvion) throws InterruptedException {
         synchronized (this) {
             System.out.println(Thread.currentThread().getName()
@@ -81,13 +85,18 @@ public class PuestoAtencion {
             }
             intercambioEnCurso = true;
         }
-        // Sale del monitor para no bloquear a otros hilos durante el exchange
-
-        // El exchanger es thread-safe, así que se hace fuera del lock
-        return exchanger.exchange(boletoAvion);
+        try {
+            return exchanger.exchange(boletoAvion);
+        } finally {
+            synchronized (this) {
+                intercambioEnCurso = false;
+                notifyAll();
+            }
+        }
     }
 
     // ----------- TRABAJADOR: entregar boleto -----------
+    // Intercambio desde el empleado del puesto
     public void intercambio() throws InterruptedException {
         synchronized (this) {
             // Espera hasta que un pasajero haya pedido intercambio
@@ -98,19 +107,20 @@ public class PuestoAtencion {
                     + " entrega un boleto de terminal a un pasajero");
             crearBoletoTerminal();
         }
-        // Exchange fuera del lock
-        exchanger.exchange(boletoTerminal);
-
-        synchronized (this) {
-            intercambioEnCurso = false;
-            notifyAll();
+        try {
+            // Exchange fuera del lock
+            exchanger.exchange(boletoTerminal);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw e;
         }
     }
 
-    // ----------- Generación de boleto (no synchronized, solo lee estado) -----------
+    // ----------- Generación de boleto (no synchronized, solo lee estado)
+    // -----------
     private void crearBoletoTerminal() {
         String[] boleto = new String[2];
-        int numeroTerminal = (int) (Math.random() * (cantidadTerminal-1));
+        int numeroTerminal = (int) (Math.random() * (cantidadTerminal - 1));
         boleto[0] = Character.toString('A' + numeroTerminal);
         int puertoTerminal = (int) (Math.random()
                 * (tamanioPE[numeroTerminal][1] - tamanioPE[numeroTerminal][0] + 1))
