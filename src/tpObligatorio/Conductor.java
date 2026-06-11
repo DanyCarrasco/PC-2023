@@ -18,7 +18,7 @@ public class Conductor implements Runnable {
                 transporte.confirmarParada(i);
                 System.out.println("Conductor confirma parada en terminal " + cadenaTerminal(i));
             }
-            transporte.reiniciarRecorrido();
+            // transporte.reiniciarRecorrido(); // Se elimina porque causa reset innecesario
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
