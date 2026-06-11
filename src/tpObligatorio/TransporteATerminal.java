@@ -3,6 +3,7 @@ package tpObligatorio;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class TransporteATerminal {
     private CyclicBarrier barrera;
@@ -12,13 +13,17 @@ public class TransporteATerminal {
     private final Semaphore[] barreraTerminal; // sincroniza salida por terminal
     private final int cantTerminales;
     private int[] pasajerosABordo; // cantidad por terminal
+    private final AtomicInteger totalSubidos = new AtomicInteger(0); // contador total de pasajeros subidos (para debug)
+    private final int totalPasajeros, capacidad; // cantidad total de pasajeros que se espera transportar (para debug)
 
-    public TransporteATerminal(int cantidad, int cantidadTerminales) {
+    public TransporteATerminal(int cantidad, int cantidadTerminales, int totalPasajeros) {
+        this.capacidad = cantidad;
         this.accionInicio = avisarConductor();
         this.barrera = new CyclicBarrier(cantidad, accionInicio);
         this.mutex = new Semaphore(1, true);
         this.maximoPasajeros = new Semaphore(cantidad, true);
         this.cantTerminales = cantidadTerminales;
+        this.totalPasajeros = totalPasajeros;
         this.barreraTerminal = new Semaphore[cantidadTerminales];
         this.pasajerosABordo = new int[cantidadTerminales];
         for (int i = 0; i < cantidadTerminales; i++) {
@@ -36,11 +41,12 @@ public class TransporteATerminal {
         // Registra que va a esta terminal
         System.out.println(Thread.currentThread().getName() + " intenta subir al transporte");
         maximoPasajeros.acquire();
-        System.out.println(Thread.currentThread().getName() + " sube al transporte");
 
         // El pasajero avisa que va a esta terminal (semáforo destino)
         mutex.acquire();
         this.pasajerosABordo[numeroTerminal - 1]++;
+        System.out.println(Thread.currentThread().getName() + " sube al transporte");
+        int subidos = totalSubidos.incrementAndGet();
         mutex.release();
 
         // Espera a que el transporte arranque (todos los cupos llenos)
@@ -49,12 +55,29 @@ public class TransporteATerminal {
         } catch (BrokenBarrierException e) {
             // Si la barrera se rompe, liberamos los rescursos (devuelve el cupo que
             // tomamos) y relanzamos la excepcion
-            maximoPasajeros.release();
-            mutex.acquire();
-            this.pasajerosABordo[numeroTerminal - 1]--;
-            mutex.release();
-            throw new InterruptedException("Barrera rota al subir: " + e.getMessage());
+
+            // maximoPasajeros.release();
+            // mutex.acquire();
+            // this.pasajerosABordo[numeroTerminal - 1]--;
+            // mutex.release();
+            // throw new InterruptedException("Barrera rota al subir: " + e.getMessage());
+
+            // Si la barrera se rompe (por el hilo de cierre), el viaje igual continúa
+            System.out.println(Thread.currentThread().getName() + " viaje forzado por fin de pasajeros");
         }
+
+        // Cuando todos los pasajeros han subido y no se completó el último grupo,
+        // un hilo aparte rompe la barrera.
+        if (subidos == totalPasajeros && subidos % capacidad != 0) {
+            new Thread(() -> {
+                try {
+                    Thread.sleep(100); // espera breve para que todos lleguen a await()
+                    barrera.reset(); // fuerza la ruptura en los que están esperando
+                } catch (InterruptedException ex) {
+                }
+            }).start();
+        }
+
     }
 
     // Pasajero baja cuando el conductor libera su terminal

@@ -50,8 +50,6 @@ public class Pasajero implements Runnable {
                     System.out.println(Thread.currentThread().getName() + " terminal inválida: " + terminal);
                 }
             }
-            puesto.salirPuesto();
-
             // En la terminal, intenta entrar al Free Shop con su boleto de Terminal
             /*
              * if(tienda.ingresarFreeShop(tiempoMaxEspera)){
@@ -70,6 +68,8 @@ public class Pasajero implements Runnable {
             Thread.currentThread().interrupt();
         } catch (Exception e) {
             System.out.println(Thread.currentThread().getName() + " error: " + e.getMessage());
+        } finally {
+            puesto.salirPuesto(); // Siempre se ejecuta, incluso con excepcion
         }
     }
 

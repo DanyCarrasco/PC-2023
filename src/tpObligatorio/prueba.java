@@ -23,7 +23,7 @@ public class prueba {
         guardia2.start();
         empleado2.start();
 
-        TransporteATerminal transporte = new TransporteATerminal(5, cantidadTerminales);
+        TransporteATerminal transporte = new TransporteATerminal(5, cantidadTerminales, 10);
 
         FreeShop tienda = new FreeShop("A", 3);
         // Thread cajero = new Thread((new Cajero (tienda)), "Cajero");
