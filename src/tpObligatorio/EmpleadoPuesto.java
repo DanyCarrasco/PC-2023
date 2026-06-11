@@ -8,14 +8,15 @@ public class EmpleadoPuesto implements Runnable {
     }
 
     public void run() {
-        int i = 0;
         try {
-            while (i < 5) {
+            while (true) {
                 puesto.intercambio();
-                i++;
             }
+        } catch (InterruptedException e) {
+            System.out.println(Thread.currentThread().getName() + " empleado interrumpido");
+            Thread.currentThread().interrupt();
         } catch (Exception e) {
-            // TODO: handle exception
+            System.out.println(Thread.currentThread().getName() + " error en empleado: " + e.getMessage());
         }
     }
 

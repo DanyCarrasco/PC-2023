@@ -28,7 +28,6 @@ public class Pasajero implements Runnable {
         try {
             // 1. Solicitar ingreso al puesto (el guardia dara permiso cuando haya lugar)
             puesto.puedeEntrarPuesto();
-            System.out.println(Thread.currentThread().getName() + " ingresa al puesto de atencion");
 
             // 2. Realizar intercambio de boleto
             boletoTerminal = puesto.realizarIntercambio(boletoAvion);
@@ -39,7 +38,7 @@ public class Pasajero implements Runnable {
                         + boletoTerminal[0] + ", en el puesto de embarque " + boletoTerminal[1]);
 
                 // 3. Salir del puerto (libera permiso)
-                puesto.salirPuesto();
+                // puesto.salirPuesto();
 
                 // 4. Obtener número de terminal y tomar el transporte (solo so el boleto es
                 // valido)
@@ -51,7 +50,7 @@ public class Pasajero implements Runnable {
                     System.out.println(Thread.currentThread().getName() + " terminal inválida: " + terminal);
                 }
             }
-            puesto.salirPuesto(); // siempre se libera el cupo, sin importar errores de boleto
+            puesto.salirPuesto();
 
             // En la terminal, intenta entrar al Free Shop con su boleto de Terminal
             /*

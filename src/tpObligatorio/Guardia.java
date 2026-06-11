@@ -1,23 +1,24 @@
 package tpObligatorio;
 
-public class Guardia implements Runnable{
+public class Guardia implements Runnable {
     private PuestoAtencion puesto;
 
-    public Guardia(PuestoAtencion puesto){
+    public Guardia(PuestoAtencion puesto) {
         this.puesto = puesto;
     }
 
     public void run() {
-        int i = 0;
         try {
-            while (i < 5) {
+            while (true) {
                 puesto.permitirIngreso();
-                Thread.sleep(5000);
-                i++;
+                // Thread.sleep(5000);
             }
+        } catch (InterruptedException e) {
+            System.out.println(Thread.currentThread().getName() + " guardia interrumpido");
+            Thread.currentThread().interrupt();
         } catch (Exception e) {
-            // TODO: handle exception
+            System.out.println(Thread.currentThread().getName() + " error en guardia: " + e.getMessage());
         }
     }
-    
+
 }
