@@ -12,14 +12,17 @@ public class Conductor implements Runnable {
     public void run() {
         try {
             System.out.println(Thread.currentThread().getName() + " empieza el recorrido");
+            // Simula el recorrido por cada terminal
             for (int i = 1; i <= cantTerminales; i++) {
-                Thread.sleep(5000);
-                System.out.println(Thread.currentThread().getName()+ " llega a la parada "+ cadenaTerminal(i));
-                transporte.llegadaParada(i);
+                Thread.sleep(1000);
+                transporte.confirmarParada(i);
+                System.out.println("Conductor confirma parada en terminal " + cadenaTerminal(i));
             }
-        } catch (Exception e) {
-            // TODO: handle exception
+            transporte.reiniciarRecorrido();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
+
     }
 
     private String cadenaTerminal(int numTerminal) {

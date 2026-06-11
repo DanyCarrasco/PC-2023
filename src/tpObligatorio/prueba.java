@@ -11,7 +11,7 @@ public class prueba {
         terminales[0][1] = 7;
         terminales[1][1] = 15;
         terminales[2][1] = 20;
-        
+
         PuestoAtencion puesto = new PuestoAtencion("Aerolineas Argentinas", 2, cantidadTerminales, terminales);
         PuestoAtencion puesto2 = new PuestoAtencion("LATAM", 2, cantidadTerminales, terminales);
         Thread guardia = new Thread((new Guardia(puesto)), "Guardia");
@@ -29,13 +29,25 @@ public class prueba {
         // Thread cajero = new Thread((new Cajero (tienda)), "Cajero");
         // cajero.start();
 
+        Thread[] pasajeros = new Thread[cantPasajeros];
         for (int i = 0; i < cantPasajeros; i++) {
-            if (i % 2 == 0){
-                (new Thread((new Pasajero(puesto2, transporte, tienda, true)), "Pasajero #" + i)).start();
+            if (i % 2 == 0) {
+                pasajeros[i] = new Thread(new Pasajero(puesto2, transporte, tienda, true), "Pasajero #" + i);
             } else {
-                (new Thread((new Pasajero(puesto, transporte, tienda, false)), "Pasajero #" + i)).start();
+                pasajeros[i] = new Thread(new Pasajero(puesto, transporte, tienda, false), "Pasajero #" + i);
+            }
+            pasajeros[i].start();
+        }
+
+        // Esperar a que todos terminen
+        for (Thread t : pasajeros) {
+            try {
+                t.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
+        System.out.println("Todos los pasajeros han finalizado.");
     }
 
 }

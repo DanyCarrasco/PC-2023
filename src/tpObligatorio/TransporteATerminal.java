@@ -1,5 +1,6 @@
 package tpObligatorio;
 
+import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.Semaphore;
 
@@ -8,11 +9,9 @@ public class TransporteATerminal {
     private Runnable accionInicio;
     private final Semaphore mutex;
     private final Semaphore maximoPasajeros;
-    private final Semaphore[] pasajerosDeTerminal;
     private final Semaphore[] barreraTerminal; // sincroniza salida por terminal
-    private int paradaTerminal = 0;
     private final int cantTerminales;
-    private int pasajerosAbordo = 0;
+    private int[] pasajerosABordo; // cantidad por terminal
 
     public TransporteATerminal(int cantidad, int cantidadTerminales) {
         this.accionInicio = avisarConductor();
@@ -20,60 +19,94 @@ public class TransporteATerminal {
         this.mutex = new Semaphore(1, true);
         this.maximoPasajeros = new Semaphore(cantidad, true);
         this.cantTerminales = cantidadTerminales;
-        this.pasajerosDeTerminal = new Semaphore[cantidadTerminales];
         this.barreraTerminal = new Semaphore[cantidadTerminales];
+        this.pasajerosABordo = new int[cantidadTerminales];
         for (int i = 0; i < cantidadTerminales; i++) {
-            this.pasajerosDeTerminal[i] = new Semaphore(0, true);
             this.barreraTerminal[i] = new Semaphore(0, true);
+            this.pasajerosABordo[i] = 0;
         }
     }
 
     // Pasajero sube al transporte
     public void subirATransporte(int numeroTerminal) throws InterruptedException {
+        if (numeroTerminal < 1 || numeroTerminal > cantTerminales) {
+            throw new IllegalArgumentException("Terminal invalida: " + numeroTerminal);
+        }
+
+        // Registra que va a esta terminal
         System.out.println(Thread.currentThread().getName() + " intenta subir al transporte");
         maximoPasajeros.acquire();
         System.out.println(Thread.currentThread().getName() + " sube al transporte");
 
         // El pasajero avisa que va a esta terminal (semáforo destino)
-        pasajerosDeTerminal[numeroTerminal - 1].release();
+        mutex.acquire();
+        this.pasajerosABordo[numeroTerminal - 1]++;
+        mutex.release();
 
         // Espera a que el transporte arranque (todos los cupos llenos)
-        barrera.await();
+        try {
+            barrera.await();
+        } catch (BrokenBarrierException e) {
+            // Si la barrera se rompe, liberamos los rescursos (devuelve el cupo que
+            // tomamos) y relanzamos la excepcion
+            maximoPasajeros.release();
+            mutex.acquire();
+            this.pasajerosABordo[numeroTerminal - 1]--;
+            mutex.release();
+            throw new InterruptedException("Barrera rota al subir: " + e.getMessage());
+        }
     }
 
-    // Conductor llega a una parada
-    public void llegadaParada(int parada) throws InterruptedException {
+    // Pasajero baja cuando el conductor libera su terminal
+    public void bajarDelTransporte(int numeroTerminal) throws InterruptedException {
+        if (numeroTerminal < 1 || numeroTerminal > cantTerminales) {
+            throw new IllegalArgumentException("Terminal invalida: " + numeroTerminal);
+        }
+
+        // Espera a que el conductor confirme la parada de esta terminal (release de
+        // barreraTerminal)
+        barreraTerminal[numeroTerminal - 1].acquire();
+        System.out.println(Thread.currentThread().getName() + " baja del transporte en la terminal "
+                + cadenaTerminal(numeroTerminal));
+
+        // Actualiza contadores y libera cupo FUERA de mutex cuando es posible
         mutex.acquire();
         try {
-            this.paradaTerminal = parada;
-            System.out.println(Thread.currentThread().getName()
-                    + " llega a la parada " + cadenaTerminal(parada));
+            this.pasajerosABordo[numeroTerminal - 1]--;
         } finally {
             mutex.release();
         }
+        maximoPasajeros.release();
     }
 
-    // Pasajero baja cuando es su parada
-    public void bajarDelTransporte(int numeroTerminal) throws InterruptedException {
-        // Espera bloqueante hasta que sea su parada
-        while (true) {
-            mutex.acquire();
-            try {
-                if (paradaTerminal == numeroTerminal) {
-                    break; // salir del while, mantener mutex
-                }
-            } finally {
-                mutex.release();
-            }
-            // No es su parada: espera un poco y reintenta
-            Thread.sleep(50);
+    // Conductor confirma parada: libera a todos los pasajeros de esa terminal
+    public void confirmarParada(int parada) throws InterruptedException {
+        if (parada < 1 || parada > cantTerminales) {
+            throw new IllegalArgumentException("Parada invalida: " + parada);
         }
-        // Aquí tenemos el mutex tomado y es nuestra parada
+        int n;
+        mutex.acquire();
         try {
-            System.out.println(Thread.currentThread().getName()
-                    + " baja del transporte en la terminal " + cadenaTerminal(numeroTerminal));
-            pasajerosDeTerminal[numeroTerminal - 1].acquire(); // espera que el conductor confirme
-            maximoPasajeros.release(); // libera el cupo
+            n = this.pasajerosABordo[parada - 1];
+        } finally {
+            mutex.release();
+        }
+        if (n > 0) {
+            barreraTerminal[parada - 1].release(n);
+        }
+    }
+
+    // Prepara el transporte para un nuevo recorrido
+    public void reiniciarRecorrido() throws InterruptedException {
+        mutex.acquire();
+        try {
+            // Resetea la barrera (hilos en await reciben BrokenBarrierException)
+            barrera.reset();
+            for (int i = 0; i < this.cantTerminales; i++) {
+                this.pasajerosABordo[i] = 0;
+                // Drena los permisos de la corrida anterior
+                this.barreraTerminal[i].drainPermits();
+            }
         } finally {
             mutex.release();
         }
