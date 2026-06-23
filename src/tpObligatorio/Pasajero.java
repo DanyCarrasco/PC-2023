@@ -4,32 +4,29 @@ public class Pasajero implements Runnable {
     private String[] boletoAvion;
     private String[] boletoTerminal;
     private PuestoAtencion puesto;
-
     private TransporteATerminal transporte;
-
     private FreeShop tienda;
+    private SalaEmbarque salaEmbarque;
     private boolean comprar;
 
-    public Pasajero(PuestoAtencion puesto, TransporteATerminal transporte, FreeShop tienda, boolean comprar) {
+    public Pasajero(PuestoAtencion puesto, TransporteATerminal transporte,
+                    FreeShop tienda, SalaEmbarque salaEmbarque, boolean comprar) {
         this.boletoAvion = new String[1];
         boletoAvion[0] = "Compañia 1";
         this.boletoTerminal = new String[0];
         this.puesto = puesto;
-
         this.transporte = transporte;
-
         this.tienda = tienda;
+        this.salaEmbarque = salaEmbarque;
         this.comprar = comprar;
     }
 
     public void run() {
-        // long tiempoRestante = 30000;
-        // long tiempoMaxEspera = tiempoRestante - 15000;
+        boolean ingreso = false;
         try {
-            // 1. Solicitar ingreso al puesto (el guardia dara permiso cuando haya lugar)
             puesto.puedeEntrarPuesto();
+            ingreso = true;
 
-            // 2. Realizar intercambio de boleto
             boletoTerminal = puesto.realizarIntercambio(boletoAvion);
             if (boletoTerminal.length == 0) {
                 System.out.println("Error de " + Thread.currentThread().getName() + ": el boleto no tiene ningun dato");
@@ -37,39 +34,39 @@ public class Pasajero implements Runnable {
                 System.out.println(Thread.currentThread().getName() + " debe ir a la terminal "
                         + boletoTerminal[0] + ", en el puesto de embarque " + boletoTerminal[1]);
 
-                // 3. Salir del puerto (libera permiso)
-                // puesto.salirPuesto();
-
-                // 4. Obtener número de terminal y tomar el transporte (solo so el boleto es
-                // valido)
                 int terminal = numeroTerminal();
                 if (terminal >= 1 && terminal <= 26) {
                     transporte.subirATransporte(terminal);
                     transporte.bajarDelTransporte(terminal);
+
+                    long tiempoRestante = 30000;
+                    long tiempoMaxEspera = tiempoRestante - 15000;
+                    if (tienda.ingresarFreeShop(tiempoMaxEspera)) {
+                        System.out.println(Thread.currentThread().getName()
+                                + " entra al Free Shop de la terminal " + boletoTerminal[0]);
+                        if (comprar) {
+                            tienda.comprarEnFreeShop();
+                        }
+                        tienda.salirFreeShop();
+                    } else {
+                        System.out.println(Thread.currentThread().getName()
+                                + " no pudo entrar al Free Shop (sin tiempo suficiente o lleno)");
+                    }
+
+                    salaEmbarque.esperarLlamado();
                 } else {
                     System.out.println(Thread.currentThread().getName() + " terminal inválida: " + terminal);
                 }
             }
-            // En la terminal, intenta entrar al Free Shop con su boleto de Terminal
-            /*
-             * if(tienda.ingresarFreeShop(tiempoMaxEspera)){
-             * if(comprar){
-             * tienda.comprarEnFreeShop();
-             * } else {
-             * tienda.salirFreeShop();
-             * }
-             * } else {
-             * System.out.println(Thread.currentThread().getName()+
-             * " no pudo entrar porque no habia lugar en tiempo maximo permitido");
-             * }
-             */
         } catch (InterruptedException e) {
             System.out.println(Thread.currentThread().getName() + " fue interrumpido: " + e.getMessage());
             Thread.currentThread().interrupt();
         } catch (Exception e) {
             System.out.println(Thread.currentThread().getName() + " error: " + e.getMessage());
         } finally {
-            puesto.salirPuesto(); // Siempre se ejecuta, incluso con excepcion
+            if (ingreso) {
+                puesto.salirPuesto();
+            }
         }
     }
 

@@ -8,16 +8,14 @@ public class Cajero implements Runnable {
     }
 
     public void run() {
-        int i = 0;
         try {
-            while (i < 5) {
+            while (true) {
                 tienda.procesarPago();
                 Thread.sleep(3000);
                 tienda.entregarTicketCompra();
-                i++;
             }
-        } catch (Exception e) {
-            // TODO: handle exception
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
 

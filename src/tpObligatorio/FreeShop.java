@@ -3,6 +3,8 @@ package tpObligatorio;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class FreeShop {
     private String idTerminal;
@@ -17,8 +19,9 @@ public class FreeShop {
     private final Semaphore avisoPasajero; // pasajero -> cajero
     private final Semaphore avisoCajero; // cajero -> pasajero
 
-    // Estado protegido por el propio Semaphore como mutex (seAcquire(1) = lock)
-    private final Semaphore mutex = new Semaphore(1, true);
+    // Lock (ReentrantLock) reemplaza al Semaphore como mutex para cumplir con la consigna
+    private final ReentrantLock lock = new ReentrantLock(true);
+    private final Condition turnoSalida = lock.newCondition();
     private boolean pagoPendiente = false;
     private boolean pagoCompletado = false;
 
@@ -58,15 +61,12 @@ public class FreeShop {
         System.out.println(Thread.currentThread().getName() + " compra en Free Shop");
         System.out.println(Thread.currentThread().getName() + " avisa a los cajeros que quiere pagar");
 
+        lock.lock();
         try {
-            mutex.acquire();
             pagoPendiente = true;
             pagoCompletado = false;
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            return;
         } finally {
-            mutex.release();
+            lock.unlock();
         }
 
         // Avisa al cajero que hay un pago pendiente
@@ -84,32 +84,21 @@ public class FreeShop {
     }
 
     // -------- PASAJERO: sale del Free Shop --------
-    public void salirFreeShop() {
-        // Valida que sea el pasajero correcto (FIFO)
+    public void salirFreeShop() throws InterruptedException {
         Thread yo = Thread.currentThread();
-        Thread cabeza;
+        lock.lock();
         try {
-            cabeza = capacidad.peek();
-        } catch (Exception e) {
-            cabeza = null;
+            while (capacidad.peek() != yo) {
+                System.out.println(Thread.currentThread().getName()
+                        + " espera su turno para salir del Free Shop de la terminal " + idTerminal);
+                turnoSalida.await();
+            }
+            capacidad.take();
+            turnoSalida.signalAll();
+        } finally {
+            lock.unlock();
         }
-
-        if (cabeza != yo) {
-            // No es el turno de este pasajero: lo deja en la cola y retorna
-            // (la cola mantiene el orden FIFO de salida)
-            System.out.println(Thread.currentThread().getName()
-                    + " espera su turno para salir del Free Shop de la terminal " + idTerminal);
-            return;
-        }
-
-        try {
-            capacidad.take(); // saca al pasajero actual
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            return;
-        }
-
-        lugar.release(); // libera el permiso para el próximo pasajero
+        lugar.release();
         System.out.println(Thread.currentThread().getName()
                 + " mira los productos y sale del Free Shop de la terminal " + idTerminal);
     }
@@ -117,46 +106,33 @@ public class FreeShop {
     // -------- CAJERO: procesa el pago --------
     public void procesarPago() {
         try {
-            // Espera el aviso de un pasajero
             avisoPasajero.acquire();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             return;
         }
 
+        lock.lock();
         try {
-            mutex.acquire();
-            // Lectura del estado bajo mutex para consistencia
             System.out.println(Thread.currentThread().getName()
                     + " recibe aviso y recibe el pago del producto del pasajero");
-        } catch (InterruptedException e){
-            Thread.currentThread().interrupt();
-            return;
         } finally {
-            mutex.release();
+            lock.unlock();
         }
     }
 
     // -------- CAJERO: entrega el ticket --------
     public void entregarTicketCompra() {
-        boolean acquired = false;
+        lock.lock();
         try {
-            mutex.acquire();
-            acquired = true;
             pagoPendiente = false;
             pagoCompletado = true;
             System.out.println(Thread.currentThread().getName()
                     + " entrega el ticket de la compra al pasajero");
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            return;
         } finally {
-            if (acquired) {
-                mutex.release();
-            }
+            lock.unlock();
         }
 
-        // Despierta al pasajero
         avisoCajero.release();
     }
 }
