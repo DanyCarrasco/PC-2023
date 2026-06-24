@@ -10,7 +10,7 @@ public class Pasajero implements Runnable {
     private boolean comprar;
 
     public Pasajero(PuestoAtencion puesto, TransporteATerminal transporte,
-                    FreeShop tienda, SalaEmbarque salaEmbarque, boolean comprar) {
+            FreeShop tienda, SalaEmbarque salaEmbarque, boolean comprar) {
         this.boletoAvion = new String[1];
         boletoAvion[0] = "Compañia 1";
         this.boletoTerminal = new String[0];
@@ -28,6 +28,10 @@ public class Pasajero implements Runnable {
             ingreso = true;
 
             boletoTerminal = puesto.realizarIntercambio(boletoAvion);
+
+            puesto.salirPuesto();
+            ingreso = false;
+
             if (boletoTerminal.length == 0) {
                 System.out.println("Error de " + Thread.currentThread().getName() + ": el boleto no tiene ningun dato");
             } else {
