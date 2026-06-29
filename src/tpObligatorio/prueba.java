@@ -17,11 +17,11 @@ public class prueba {
         PuestoInformes informes = new PuestoInformes(puestos);
 
         Thread guardia = new Thread(new Guardia(puesto), "Guardia");
-        Thread empleado = new Thread(new EmpleadoPuesto(puesto), "Empleado");
+        Thread empleado = new Thread(new EmpleadoAtencion(puesto), "Empleado");
         guardia.start();
         empleado.start();
         Thread guardia2 = new Thread(new Guardia(puesto2), "Guardia 2");
-        Thread empleado2 = new Thread(new EmpleadoPuesto(puesto2), "Empleado 2");
+        Thread empleado2 = new Thread(new EmpleadoAtencion(puesto2), "Empleado 2");
         guardia2.start();
         empleado2.start();
 

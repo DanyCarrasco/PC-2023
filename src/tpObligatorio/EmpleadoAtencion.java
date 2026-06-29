@@ -1,9 +1,9 @@
 package tpObligatorio;
 
-public class EmpleadoPuesto implements Runnable {
+public class EmpleadoAtencion implements Runnable {
     private PuestoAtencion puesto;
 
-    public EmpleadoPuesto(PuestoAtencion puesto) {
+    public EmpleadoAtencion(PuestoAtencion puesto) {
         this.puesto = puesto;
     }
 
