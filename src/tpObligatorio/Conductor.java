@@ -18,6 +18,7 @@ public class Conductor implements Runnable {
                 System.out.println("Conductor confirma parada en terminal " + cadenaTerminal(i));
             }
             System.out.println("Conductor termina el recorrido y vuelve al inicio");
+            transporte.terminoRecorrido();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }

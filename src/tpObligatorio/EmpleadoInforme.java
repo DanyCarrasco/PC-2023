@@ -9,7 +9,7 @@ public class EmpleadoInforme implements Runnable {
 
     public void run() {
         while (true) {
-            puesto.derivarAPuesto();
+            puesto.atenderPasajero();
         }
     }
 }

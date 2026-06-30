@@ -3,9 +3,11 @@ package tpObligatorio;
 import java.util.concurrent.CountDownLatch;
 
 public class SalaEmbarque {
+    private String nombreTerminal;
     private final CountDownLatch embarque;
 
-    public SalaEmbarque(int cantPasajeros) {
+    public SalaEmbarque(String nombreTerminal, int cantPasajeros) {
+        this.nombreTerminal = nombreTerminal;
         this.embarque = new CountDownLatch(cantPasajeros);
     }
 
@@ -19,7 +21,7 @@ public class SalaEmbarque {
     }
 
     public void llamarAEmbarcar() {
-        System.out.println("*** LA TORRE DE CONTROL LLAMA A EMBARCAR ***");
+        System.out.println("*** LA TORRE DE CONTROL LLAMA A EMBARCAR A PASAJEROS DEL TERMINAL " + nombreTerminal + "***");
         while (embarque.getCount() > 0) {
             embarque.countDown();
         }

@@ -2,6 +2,8 @@ package tpObligatorio;
 
 public class prueba {
     public static void main(String[] args) {
+
+        //Definicion que se implementa en clase Aeropuerto
         int cantPasajeros = 10, cantidadTerminales = 3;
         int[][] terminales = new int[cantidadTerminales][2];
         terminales[0][0] = 1;
@@ -11,20 +13,34 @@ public class prueba {
         terminales[1][1] = 15;
         terminales[2][1] = 20;
 
-        PuestoAtencion puesto = new PuestoAtencion("Aerolineas Argentinas", 2, cantidadTerminales, terminales);
-        PuestoAtencion puesto2 = new PuestoAtencion("LATAM", 2, cantidadTerminales, terminales);
-        PuestoAtencion[] puestos = { puesto, puesto2 };
-        PuestoInformes informes = new PuestoInformes(puestos);
+        String [] aerolineas = new String[3];
+        aerolineas[0] = "Aerolineas Argentinas";
+        aerolineas[1] = "LATAM";
+        aerolineas[2] = "JetSMART";
 
-        Thread guardia = new Thread(new Guardia(puesto), "Guardia");
-        Thread empleado = new Thread(new EmpleadoAtencion(puesto), "Empleado");
+        IngresoAeropuerto entrada = new IngresoAeropuerto(aerolineas, cantPasajeros, cantidadTerminales, terminales);
+
+        //Se implementan en la clase 'prueba'
+        Thread guardia = new Thread(new Guardia(entrada.puestos[0]), "Guardia");
+        Thread empleadoAtencion = new Thread(new EmpleadoAtencion(entrada.puestos[0]), "Empleado");
         guardia.start();
-        empleado.start();
-        Thread guardia2 = new Thread(new Guardia(puesto2), "Guardia 2");
-        Thread empleado2 = new Thread(new EmpleadoAtencion(puesto2), "Empleado 2");
-        guardia2.start();
-        empleado2.start();
+        empleadoAtencion.start();
 
+        Thread guardia2 = new Thread(new Guardia(entrada.puestos[1]), "Guardia 2");
+        Thread empleadoAtencion2 = new Thread(new EmpleadoAtencion(entrada.puestos[1]), "Empleado 2");
+        guardia2.start();
+        empleadoAtencion2.start();
+
+        Thread guardia3 = new Thread(new Guardia(entrada.puestos[2]), "Guardia");
+        Thread empleadoAtencion3 = new Thread(new EmpleadoAtencion(entrada.puestos[2]), "Empleado");
+        guardia3.start();
+        empleadoAtencion3.start();
+
+        Thread empleadoInforme = new Thread(new EmpleadoInforme(entrada.informe), "Empleado Informe");
+        empleadoInforme.start();
+
+
+        // definicion de Terminal de cada uno y de Aeropuerto
         TransporteATerminal transporte = new TransporteATerminal(5, cantidadTerminales, cantPasajeros);
 
         FreeShop[] tiendas = new FreeShop[cantidadTerminales];
@@ -42,10 +58,9 @@ public class prueba {
 
         Thread[] pasajeros = new Thread[cantPasajeros];
         for (int i = 0; i < cantPasajeros; i++) {
-            PuestoAtencion puestoAsignado = informes.derivarAPuesto();
             int term = (int) (Math.random() * cantidadTerminales);
             pasajeros[i] = new Thread(
-                    new Pasajero(puestoAsignado, transporte, tiendas[term], sala, i % 2 == 0),
+                    new Pasajero(entrada.informe, transporte, tiendas[term], sala, i % 2 == 0),
                     "Pasajero #" + i);
             pasajeros[i].start();
         }

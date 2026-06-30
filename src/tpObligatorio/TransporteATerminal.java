@@ -18,6 +18,10 @@ public class TransporteATerminal {
     private final int capacidad;
     private final CountDownLatch finPasajeros;
 
+    private int pasajerosTerminal[];
+    private boolean realizoRecorrido;
+    private Semaphore mutexRecorrido;
+
     public TransporteATerminal(int cantidad, int cantidadTerminales, int totalPasajeros) {
         this.capacidad = cantidad;
         this.barrera = new CyclicBarrier(cantidad, this::avisarConductor);
@@ -26,11 +30,16 @@ public class TransporteATerminal {
         this.cantTerminales = cantidadTerminales;
         this.barreraTerminal = new Semaphore[cantidadTerminales];
         this.pasajerosABordo = new int[cantidadTerminales];
+        this.pasajerosTerminal = new int[cantidadTerminales];
         for (int i = 0; i < cantidadTerminales; i++) {
             this.barreraTerminal[i] = new Semaphore(0, true);
             this.pasajerosABordo[i] = 0;
+            this.pasajerosTerminal[i] = 0;
         }
         this.finPasajeros = new CountDownLatch(totalPasajeros);
+
+        this.realizoRecorrido = false;
+        this.mutexRecorrido = new Semaphore(1);
     }
 
     public void subirATransporte(int numeroTerminal) throws InterruptedException {
@@ -79,12 +88,14 @@ public class TransporteATerminal {
         mutex.acquire();
         try {
             this.pasajerosABordo[numeroTerminal - 1]--;
+            this.pasajerosTerminal[numeroTerminal-1]++;
         } finally {
             mutex.release();
         }
         maximoPasajeros.release();
     }
 
+    // Lo realiza Chofer del transporte
     public void confirmarParada(int parada) throws InterruptedException {
         if (parada < 1 || parada > cantTerminales) {
             throw new IllegalArgumentException("Parada invalida: " + parada);
@@ -99,6 +110,34 @@ public class TransporteATerminal {
         if (n > 0) {
             barreraTerminal[parada - 1].release(n);
         }
+    }
+
+    // lo usa chofer, indicando que realizo un recorrido
+    public void terminoRecorrido(){
+        try {
+            mutexRecorrido.acquire();
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        realizoRecorrido = true;
+        mutexRecorrido.release();
+    }
+
+    // Lo usa Terminal para saber la cantidad de pasajeros que bajan en una terminal
+    public int getCantidadPasajerosTerminal(int numeroTerminal){
+        int cantidadPasajeros = 0;
+        try {
+            mutexRecorrido.acquire();
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        if (realizoRecorrido) {
+            cantidadPasajeros = this.pasajerosTerminal[numeroTerminal-1];
+        }
+        mutexRecorrido.release();
+        return cantidadPasajeros;
     }
 
     private void avisarConductor() {
