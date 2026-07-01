@@ -40,25 +40,26 @@ public class Pasajero implements Runnable {
                             + boletoTerminal[0] + ", en el puesto de embarque " + boletoTerminal[1]);
 
                     int terminal = numeroTerminal();
-                    if (terminal >= 1 && terminal <= 26) {
+                    if (terminal >= 1 && terminal <= aeropuerto.terminales.length) {
+                        int idxTerminal = terminal - 1;
                         transporte.subirATransporte(terminal);
                         transporte.bajarDelTransporte(terminal);
 
                         long tiempoRestante = 30000;
                         long tiempoMaxEspera = tiempoRestante - 15000;
-                        if (aeropuerto.terminales[terminal].tienda.ingresarFreeShop(tiempoMaxEspera)) {
+                        if (aeropuerto.terminales[idxTerminal].tienda.ingresarFreeShop(tiempoMaxEspera)) {
                             System.out.println(Thread.currentThread().getName()
                                     + " entra al Free Shop de la terminal " + boletoTerminal[0]);
                             if (comprar) {
-                                aeropuerto.terminales[terminal].tienda.comprarEnFreeShop();
+                                aeropuerto.terminales[idxTerminal].tienda.comprarEnFreeShop();
                             }
-                            aeropuerto.terminales[terminal].tienda.salirFreeShop();
+                            aeropuerto.terminales[idxTerminal].tienda.salirFreeShop();
                         } else {
                             System.out.println(Thread.currentThread().getName()
                                     + " no pudo entrar al Free Shop (sin tiempo suficiente o lleno)");
                         }
 
-                        aeropuerto.terminales[terminal].sala.esperarLlamado();
+                        aeropuerto.terminales[idxTerminal].sala.esperarLlamado();
                     } else {
                         System.out.println(Thread.currentThread().getName() + " terminal inválida: " + terminal);
                     }

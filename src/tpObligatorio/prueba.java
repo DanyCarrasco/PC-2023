@@ -14,16 +14,11 @@ public class prueba {
         aerolineas[1] = "LATAM";
         aerolineas[2] = "JetSMART";
 
-        int[][] puertosEmbarque= new int[3][2];
+        int[][] puertosEmbarque = new int[3][2];
 
         for (int i = 0; i < puertosEmbarque.length; i++) {
-            for (int j = 0; j < 2; j++) {
-                if (i == 0){
-                    puertosEmbarque[i][j] = aeropuerto.terminales[i].getPuertoInicio();
-                } else {
-                    puertosEmbarque[i][j] = aeropuerto.terminales[i].getPuertoFinal();
-                }
-            }
+            puertosEmbarque[i][0] = aeropuerto.terminales[i].getPuertoInicio();
+            puertosEmbarque[i][1] = aeropuerto.terminales[i].getPuertoFinal();
         }
 
 
@@ -41,7 +36,7 @@ public class prueba {
         empleadoAtencion2.start();
 
         Thread guardia3 = new Thread(new Guardia(entrada.puestos[2]), "Guardia 3");
-        Thread empleadoAtencion3 = new Thread(new EmpleadoAtencion(entrada.puestos[2]), "Empleado");
+        Thread empleadoAtencion3 = new Thread(new EmpleadoAtencion(entrada.puestos[2]), "Empleado 3");
         guardia3.start();
         empleadoAtencion3.start();
 

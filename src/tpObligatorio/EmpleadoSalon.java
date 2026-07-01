@@ -10,8 +10,11 @@ public class EmpleadoSalon implements Runnable{
     }
 
     public void run(){
-        while (true) {
+        try {
+            embarques.sala.esperarPasajero();
             embarques.sala.llamarAEmbarcar();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }    
 }

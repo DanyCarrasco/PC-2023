@@ -57,6 +57,7 @@ public class PuestoAtencion {
         } finally {
             esperando--;
         }
+        notifyAll(); // avisa al guardia que el permiso fue consumido
         System.out.println(Thread.currentThread().getName() + " ingresa al puesto de atencion de " + nombre);
     }
 
@@ -64,7 +65,7 @@ public class PuestoAtencion {
     // Llamado por el guardia para permitir la entrada de un pasajero (si hay
     // esperando y cupo)
     public synchronized void permitirIngreso() throws InterruptedException {
-        while (esperando == 0 || activos >= maxPasajeros) {
+        while (esperando == 0 || activos >= maxPasajeros || permisosPendientes > 0) {
             wait();
         }
         permisosPendientes++;

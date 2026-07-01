@@ -14,7 +14,7 @@ public class Terminal {
     public Terminal(String id, int cantMaxima, int puertoInicio, int puertoFinal){
         this.id = id;
         this.cantPasajeros = 0;
-        sala = new SalaEmbarque(id, cantPasajeros);
+        sala = new SalaEmbarque(id);
         tienda = new FreeShop(id, cantMaxima);
         mutex = new Semaphore(1);
         cantidadPuertos[0] = puertoInicio;

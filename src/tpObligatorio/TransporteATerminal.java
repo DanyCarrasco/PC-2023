@@ -21,6 +21,7 @@ public class TransporteATerminal {
     private int pasajerosTerminal[];
     private boolean realizoRecorrido;
     private Semaphore mutexRecorrido;
+    private final Semaphore puedeAbordar;
 
     public TransporteATerminal(int cantidad, int cantidadTerminales, int totalPasajeros) {
         this.capacidad = cantidad;
@@ -40,6 +41,7 @@ public class TransporteATerminal {
 
         this.realizoRecorrido = false;
         this.mutexRecorrido = new Semaphore(1);
+        this.puedeAbordar = new Semaphore(cantidad, true);
     }
 
     public void subirATransporte(int numeroTerminal) throws InterruptedException {
@@ -47,6 +49,8 @@ public class TransporteATerminal {
             throw new IllegalArgumentException("Terminal invalida: " + numeroTerminal);
         }
 
+        System.out.println(Thread.currentThread().getName() + " espera para abordar el transporte");
+        puedeAbordar.acquire();
         System.out.println(Thread.currentThread().getName() + " intenta subir al transporte");
         maximoPasajeros.acquire();
 
@@ -114,11 +118,11 @@ public class TransporteATerminal {
 
     // lo usa chofer, indicando que realizo un recorrido
     public void terminoRecorrido(){
+        puedeAbordar.release(capacidad);
         try {
             mutexRecorrido.acquire();
         } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            Thread.currentThread().interrupt();
         }
         realizoRecorrido = true;
         mutexRecorrido.release();
@@ -140,7 +144,8 @@ public class TransporteATerminal {
         return cantidadPasajeros;
     }
 
-    private void avisarConductor() {
+    private synchronized void avisarConductor() {
+        puedeAbordar.drainPermits();
         Thread conductor = new Thread(new Conductor(this, cantTerminales), "Conductor");
         conductor.start();
     }
