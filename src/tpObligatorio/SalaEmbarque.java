@@ -21,7 +21,8 @@ public class SalaEmbarque {
     }
 
     public void llamarAEmbarcar() {
-        System.out.println("*** LA TORRE DE CONTROL LLAMA A EMBARCAR A PASAJEROS DEL TERMINAL " + nombreTerminal + "***");
+        System.out.println("*** " + Thread.currentThread().getName() + " LLAMA A EMBARCAR A PASAJEROS DEL TERMINAL "
+                + nombreTerminal + "***");
         while (embarque.getCount() > 0) {
             embarque.countDown();
         }

@@ -7,15 +7,18 @@ public class Terminal {
     public FreeShop tienda;
     public SalaEmbarque sala;
     private int cantPasajeros;
+    private int[] cantidadPuertos = new int[2]; // puertos de embarque
 
     private Semaphore mutex;
 
-    public Terminal(String id, int cantMaxima){
+    public Terminal(String id, int cantMaxima, int puertoInicio, int puertoFinal){
         this.id = id;
         this.cantPasajeros = 0;
         sala = new SalaEmbarque(id, cantPasajeros);
         tienda = new FreeShop(id, cantMaxima);
         mutex = new Semaphore(1);
+        cantidadPuertos[0] = puertoInicio;
+        cantidadPuertos[1] = puertoFinal;
     }
     
     public void ingresarTerminal(){
@@ -33,5 +36,15 @@ public class Terminal {
         cantPasajeros = cantidad;
     }
     
-    
+    public String getId(){
+        return id;
+    }
+
+    public int getPuertoInicio(){
+        return this.cantidadPuertos[0];
+    }
+
+    public int getPuertoFinal(){
+        return this.cantidadPuertos[1];
+    }
 }

@@ -5,26 +5,23 @@ public class Pasajero implements Runnable {
     private String[] boletoTerminal;
     private PuestoAtencion puesto;
     private TransporteATerminal transporte;
-    private FreeShop tienda;
-    private SalaEmbarque salaEmbarque;
     private boolean comprar;
-    private PuestoInformes informe;
+    private Aeropuerto aeropuerto;
+    private IngresoAeropuerto entrada;
 
-    public Pasajero(PuestoInformes informe, TransporteATerminal transporte,
-            FreeShop tienda, SalaEmbarque salaEmbarque, boolean comprar) {
+    public Pasajero(IngresoAeropuerto entrada, Aeropuerto aeropuerto, boolean comprar) {
         this.boletoAvion = new String[1];
         boletoAvion[0] = "Compañia 1";
         this.boletoTerminal = new String[0];
-        this.transporte = transporte;
-        this.tienda = tienda;
-        this.salaEmbarque = salaEmbarque;
+        this.transporte = aeropuerto.transporte;
+        this.aeropuerto = aeropuerto;
         this.comprar = comprar;
-        this.informe = informe;
+        this.entrada = entrada;
     }
 
     public void run() {
         boolean ingreso = false;
-        puesto = informe.llegarAInforme();
+        puesto = entrada.informe.llegarAInforme();
         if (puesto != null) {
             try {
                 puesto.puedeEntrarPuesto();
@@ -49,19 +46,19 @@ public class Pasajero implements Runnable {
 
                         long tiempoRestante = 30000;
                         long tiempoMaxEspera = tiempoRestante - 15000;
-                        if (tienda.ingresarFreeShop(tiempoMaxEspera)) {
+                        if (aeropuerto.terminales[terminal].tienda.ingresarFreeShop(tiempoMaxEspera)) {
                             System.out.println(Thread.currentThread().getName()
                                     + " entra al Free Shop de la terminal " + boletoTerminal[0]);
                             if (comprar) {
-                                tienda.comprarEnFreeShop();
+                                aeropuerto.terminales[terminal].tienda.comprarEnFreeShop();
                             }
-                            tienda.salirFreeShop();
+                            aeropuerto.terminales[terminal].tienda.salirFreeShop();
                         } else {
                             System.out.println(Thread.currentThread().getName()
                                     + " no pudo entrar al Free Shop (sin tiempo suficiente o lleno)");
                         }
 
-                        salaEmbarque.esperarLlamado();
+                        aeropuerto.terminales[terminal].sala.esperarLlamado();
                     } else {
                         System.out.println(Thread.currentThread().getName() + " terminal inválida: " + terminal);
                     }
