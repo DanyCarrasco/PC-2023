@@ -6,14 +6,12 @@ public class Terminal {
     private String id;
     public FreeShop tienda;
     public SalaEmbarque sala;
-    private int puestoEmbarqueInicial, puestoEmbarqueFinal, cantPasajeros;
+    private int cantPasajeros;
 
     private Semaphore mutex;
 
-    public Terminal(String id, int cantMaxima, int puestoEmbarqueInicial, int puestoEmbarqueFinal){
+    public Terminal(String id, int cantMaxima){
         this.id = id;
-        this.puestoEmbarqueInicial = puestoEmbarqueInicial;
-        this.puestoEmbarqueFinal = puestoEmbarqueFinal;
         this.cantPasajeros = 0;
         sala = new SalaEmbarque(id, cantPasajeros);
         tienda = new FreeShop(id, cantMaxima);
@@ -31,6 +29,9 @@ public class Terminal {
         mutex.release();
     }
 
+    public void cambiarCantidadPasajeros(int cantidad){
+        cantPasajeros = cantidad;
+    }
     
     
 }
