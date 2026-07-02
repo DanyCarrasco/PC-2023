@@ -4,79 +4,78 @@ public class Pasajero implements Runnable {
     private String[] boletoAvion;
     private String[] boletoTerminal;
     private PuestoAtencion puesto;
-    private TransporteATerminal transporte;
     private boolean comprar;
     private Aeropuerto aeropuerto;
-    private IngresoAeropuerto entrada;
+    private ControlAeropuerto control;
 
-    public Pasajero(IngresoAeropuerto entrada, Aeropuerto aeropuerto, boolean comprar) {
+    public Pasajero(ControlAeropuerto control, Aeropuerto aeropuerto, boolean comprar) {
         this.boletoAvion = new String[1];
         boletoAvion[0] = "Compañia 1";
         this.boletoTerminal = new String[0];
-        this.transporte = aeropuerto.transporte;
         this.aeropuerto = aeropuerto;
+        this.control = control;
         this.comprar = comprar;
-        this.entrada = entrada;
     }
 
     public void run() {
-        boolean ingreso = false;
-        puesto = entrada.informe.llegarAInforme();
-        if (puesto != null) {
-            try {
-                puesto.puedeEntrarPuesto();
-                ingreso = true;
+        System.out.println(Thread.currentThread().getName() + " intenta ingresar al aeropuerto VIAJE BONITO");
+        control.entrarAlAeropuerto();
+        boolean entro = control.getEntradaAeropuerto();
+        if (entro) {
+            puesto = aeropuerto.entrada.informe.llegarAInforme();
+            if (puesto != null) {
+                try {
+                    puesto.puedeEntrarPuesto();
 
-                boletoTerminal = puesto.realizarIntercambio(boletoAvion);
+                    boletoTerminal = puesto.realizarIntercambio(boletoAvion);
 
-                puesto.salirPuesto();
-                ingreso = false;
-
-                if (boletoTerminal.length == 0) {
-                    System.out.println(
-                            "Error de " + Thread.currentThread().getName() + ": el boleto no tiene ningun dato");
-                } else {
-                    System.out.println(Thread.currentThread().getName() + " debe ir a la terminal "
-                            + boletoTerminal[0] + ", en el puesto de embarque " + boletoTerminal[1]);
-
-                    int terminal = numeroTerminal();
-                    if (terminal >= 1 && terminal <= aeropuerto.terminales.length) {
-                        int idxTerminal = terminal - 1;
-                        transporte.subirATransporte(terminal);
-                        transporte.bajarDelTransporte(terminal);
-
-                        long tiempoRestante = 30000;
-                        long tiempoMaxEspera = tiempoRestante - 15000;
-                        if (aeropuerto.terminales[idxTerminal].tienda.ingresarFreeShop(tiempoMaxEspera)) {
-                            System.out.println(Thread.currentThread().getName()
-                                    + " entra al Free Shop de la terminal " + boletoTerminal[0]);
-                            if (comprar) {
-                                aeropuerto.terminales[idxTerminal].tienda.comprarEnFreeShop();
-                            }
-                            aeropuerto.terminales[idxTerminal].tienda.salirFreeShop();
-                        } else {
-                            System.out.println(Thread.currentThread().getName()
-                                    + " no pudo entrar al Free Shop (sin tiempo suficiente o lleno)");
-                        }
-
-                        aeropuerto.terminales[idxTerminal].sala.esperarLlamado();
-                    } else {
-                        System.out.println(Thread.currentThread().getName() + " terminal inválida: " + terminal);
-                    }
-                }
-            } catch (InterruptedException e) {
-                System.out.println(Thread.currentThread().getName() + " fue interrumpido: " + e.getMessage());
-                Thread.currentThread().interrupt();
-            } catch (Exception e) {
-                System.out.println(Thread.currentThread().getName() + " error: " + e.getMessage());
-            } finally {
-                if (ingreso) {
                     puesto.salirPuesto();
+
+                    if (boletoTerminal.length == 0) {
+                        System.out.println(
+                                "Error de " + Thread.currentThread().getName() + ": el boleto no tiene ningun dato");
+                    } else {
+                        System.out.println(Thread.currentThread().getName() + " debe ir a la terminal "
+                                + boletoTerminal[0] + ", en el puesto de embarque " + boletoTerminal[1]);
+
+                        int terminal = numeroTerminal();
+                        if (terminal >= 1 && terminal <= aeropuerto.terminales.length) {
+                            int idxTerminal = terminal - 1;
+                            aeropuerto.transporte.subirATransporte(terminal);
+                            aeropuerto.transporte.bajarDelTransporte(terminal);
+
+                            long tiempoRestante = 30000;
+                            long tiempoMaxEspera = tiempoRestante - 15000;
+                            if (aeropuerto.terminales[idxTerminal].tienda.ingresarFreeShop(tiempoMaxEspera)) {
+                                System.out.println(Thread.currentThread().getName()
+                                        + " entra al Free Shop de la terminal " + boletoTerminal[0]);
+                                if (comprar) {
+                                    aeropuerto.terminales[idxTerminal].tienda.comprarEnFreeShop();
+                                }
+                                aeropuerto.terminales[idxTerminal].tienda.salirFreeShop();
+                            } else {
+                                System.out.println(Thread.currentThread().getName()
+                                        + " no pudo entrar al Free Shop (sin tiempo suficiente o lleno)");
+                            }
+
+                            aeropuerto.terminales[idxTerminal].sala.esperarLlamado();
+                        } else {
+                            System.out.println(Thread.currentThread().getName() + " terminal inválida: " + terminal);
+                        }
+                    }
+                } catch (InterruptedException e) {
+                    System.out.println(Thread.currentThread().getName() + " fue interrumpido: " + e.getMessage());
+                    Thread.currentThread().interrupt();
+                } catch (Exception e) {
+                    System.out.println(Thread.currentThread().getName() + " error: " + e.getMessage());
                 }
+            } else {
+                System.out.println(Thread.currentThread().getName()
+                        + " no pudo ser derivado a un puesto de atencion de una aerolinea");
             }
         } else {
-            System.out.println(Thread.currentThread().getName()
-                    + " no pudo ser derivado a un puesto de atencion de una aerolinea");
+            System.out.println(Thread.currentThread().getName() + " no pudo ingresar al aeropuerto porque esta CERRADO"
+            );
         }
     }
 

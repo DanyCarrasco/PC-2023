@@ -3,11 +3,26 @@ package tpObligatorio;
 public class Aeropuerto {
     public Terminal[] terminales;
     public TransporteATerminal transporte;
+    public IngresoAeropuerto entrada;
 
     public Aeropuerto(int cantidadPasajeros) {
         terminales = new Terminal[3];
         transporte = new TransporteATerminal(5, 3, cantidadPasajeros); // despues modificarlo, porque no se sabe la
                                                                      // cantidad de pasajeros
+        String [] aerolineas = new String[3];
+        aerolineas[0] = "Aerolineas Argentinas";
+        aerolineas[1] = "LATAM";
+        aerolineas[2] = "JetSMART";
+
+        int[][] puertosEmbarque = new int[3][2];
+
+        for (int i = 0; i < puertosEmbarque.length; i++) {
+            puertosEmbarque[i][0] = terminales[i].getPuertoInicio();
+            puertosEmbarque[i][1] = terminales[i].getPuertoFinal();
+        }
+
+
+        entrada = new IngresoAeropuerto(aerolineas, 2, 3, puertosEmbarque);
         iniciarTerminales();
     }
 
