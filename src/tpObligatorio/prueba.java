@@ -10,6 +10,9 @@ public class prueba {
 
         ControlAeropuerto control = new ControlAeropuerto(aeropuerto);
 
+        Thread administrador = new Thread(new AdministradorAeropuerto(control), "Administrador del Aeropuerto");
+        administrador.start();
+
         //Se implementan en la clase 'prueba' los empleados
         Thread guardia = new Thread(new Guardia(aeropuerto.entrada.puestos[0]), "Guardia");
         Thread empleadoAtencion = new Thread(new EmpleadoAtencion(aeropuerto.entrada.puestos[0]), "Empleado");
