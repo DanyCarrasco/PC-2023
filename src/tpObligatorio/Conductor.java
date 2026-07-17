@@ -26,6 +26,6 @@ public class Conductor implements Runnable {
 
     private String cadenaTerminal(int numTerminal) {
         // ingresa un numero que sea entre 1 y cantidadTerminales
-        return Character.toString('A' + numTerminal - 1);
+        return Character.toString((char) ('A' + numTerminal - 1));
     }
 }

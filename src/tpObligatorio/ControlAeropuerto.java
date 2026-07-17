@@ -29,28 +29,27 @@ public class ControlAeropuerto {
 
     public void entrarAlAeropuerto() {
         lock.lock();
-        while (!abierto) {
-            try {
-                pasajeros.await(0, null);
-            } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+        try {
+            while (!abierto) {
+                pasajeros.await();
             }
+            System.out.println(Thread.currentThread().getName() + " entro al aeropuerto");
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } finally {
+            lock.unlock();
         }
-        System.out.println(Thread.currentThread().getName() + " entro al aeropuerto");
-        lock.unlock();
     }
 
     public void cerrarAeropuerto() {
         lock.lock();
         try {
-            administrador.await(10, TimeUnit.SECONDS);
+            administrador.await(5, TimeUnit.SECONDS);
             abierto = false;
             System.out.println(Thread.currentThread().getName() + " cierra ingreso de pasajeros al aeropuerto VIAJE BONITO");
             pasajeros.signalAll();
         } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            Thread.currentThread().interrupt();
         } finally {
             lock.unlock();
         }

@@ -154,6 +154,6 @@ public class TransporteATerminal {
         if (numeroTerminal < 1 || numeroTerminal > 26) {
             return "?";
         }
-        return Character.toString(('A' + numeroTerminal - 1));
+        return Character.toString((char) ('A' + numeroTerminal - 1));
     }
 }

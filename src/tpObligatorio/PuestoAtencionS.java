@@ -71,7 +71,7 @@ public class PuestoAtencionS {
     private void crearBoletoTerminal() {
         String[] boleto = new String[2];
         int numeroTerminal = (int) (Math.random() * cantidadTerminal);
-        boleto[0] = Character.toString('A' + numeroTerminal);
+        boleto[0] = Character.toString((char) ('A' + numeroTerminal));
         int puertoTerminal = (int) (Math.random()
                 * (tamanioPE[numeroTerminal][1] - tamanioPE[numeroTerminal][0] + 1))
                 + tamanioPE[numeroTerminal][0];

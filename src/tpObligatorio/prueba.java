@@ -2,7 +2,7 @@ package tpObligatorio;
 
 public class prueba {
     public static void main(String[] args) {
-        int cantidadPasajeros = 10;
+        int cantidadPasajeros = 20;
 
         //Definicion que se implementa en clase Aeropuerto
 
@@ -43,23 +43,13 @@ public class prueba {
             }
         }
 
-        Thread[] pasajeros = new Thread[10];
+        Thread[] pasajeros = new Thread[cantidadPasajeros];
         for (int i = 0; i < cantidadPasajeros; i++) {
             pasajeros[i] = new Thread(
                     new Pasajero(control, aeropuerto, i % 2 == 0),
                     "Pasajero #" + i);
             pasajeros[i].start();
         }
-
-        for (Thread t : pasajeros) {
-            try {
-                t.join();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-
-        System.out.println("Todos los pasajeros han finalizado.");
     }
 
 }
