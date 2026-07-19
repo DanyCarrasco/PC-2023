@@ -15,6 +15,7 @@ public class PuestoInformes {
         this.puestos = puestos;
     }
 
+    // Pasajero llega al puesto de informes y espera a ser atendido por un empleado del puesto de informes
     public PuestoAtencion llegarAInforme() {
         lock.lock();
         try {
@@ -39,6 +40,7 @@ public class PuestoInformes {
         }
     }
 
+    // Metodo que atiende al pasajero y lo deriva a un puesto de atencion
     public void atenderPasajero() {
         lock.lock();
         try {
@@ -50,7 +52,7 @@ public class PuestoInformes {
             System.out.println(Thread.currentThread().getName()
                     + " atiende al pasajero y lo deriva a un puesto de atencion");
             atendiendo = false;
-            pasajeroEspera.signalAll();
+            pasajeroEspera.signal();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         } finally {

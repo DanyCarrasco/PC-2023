@@ -10,6 +10,8 @@ public class ControlAeropuerto {
     private ReentrantLock lock;
     private Condition administrador, pasajeros;
     private boolean abierto;
+    // Tiempo que el administrador espera antes de cerrar (simula las 6:00-22:00)
+    private static final int TIEMPO_ABIERTO_SEGUNDOS = 30;
 
     public ControlAeropuerto(Aeropuerto aeropuerto) {
         this.aeropuerto = aeropuerto;
@@ -21,32 +23,41 @@ public class ControlAeropuerto {
 
     public void abrirAeropuerto() {
         lock.lock();
-        System.out.println(Thread.currentThread().getName() + " abre el aeropuerto VIAJE BONITO");
-        abierto = true;
-        pasajeros.signalAll();
-        lock.unlock();
+        try {
+            System.out.println(Thread.currentThread().getName() + " abre el aeropuerto VIAJE BONITO");
+            abierto = true;
+            pasajeros.signalAll();
+        } finally {
+            lock.unlock();
+        }
     }
 
-    public void entrarAlAeropuerto() {
+    // Pasajero intenta entrar al aeropuerto. Retorna true si entro, false si esta cerrado.
+    // La lectura de abierto se hace DENTRO del lock, eliminando la race condition.
+    public boolean entrarAlAeropuerto() {
         lock.lock();
         try {
             while (!abierto) {
                 pasajeros.await();
             }
             System.out.println(Thread.currentThread().getName() + " entro al aeropuerto");
+            return true;
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+            return false;
         } finally {
             lock.unlock();
         }
     }
 
+    // Administrador cierra el aeropuerto despues de un tiempo
     public void cerrarAeropuerto() {
         lock.lock();
         try {
-            administrador.await(5, TimeUnit.SECONDS);
+            administrador.await(TIEMPO_ABIERTO_SEGUNDOS, TimeUnit.SECONDS);
             abierto = false;
-            System.out.println(Thread.currentThread().getName() + " cierra ingreso de pasajeros al aeropuerto VIAJE BONITO");
+            System.out.println(Thread.currentThread().getName()
+                    + " cierra ingreso de pasajeros al aeropuerto VIAJE BONITO");
             pasajeros.signalAll();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -54,9 +65,4 @@ public class ControlAeropuerto {
             lock.unlock();
         }
     }
-
-    public boolean getEntradaAeropuerto() {
-        return abierto;
-    }
-
 }

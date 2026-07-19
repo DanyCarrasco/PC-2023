@@ -8,7 +8,6 @@ public class Aeropuerto {
     public Aeropuerto(int cantidadPasajeros) {
         terminales = new Terminal[3];
         transporte = new TransporteATerminal(5, 3, cantidadPasajeros); 
-        // despues modificarlo, porque no se sabe la cantidad de pasajeros
         entrada = new IngresoAeropuerto(2);
         iniciarTerminales();
     }

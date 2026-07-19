@@ -4,23 +4,18 @@ import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class TransporteATerminal {
     private CyclicBarrier barrera;
     private final Semaphore mutex;
     private final Semaphore maximoPasajeros;
     private final Semaphore[] barreraTerminal;
-    private final Semaphore inicioUltimoViaje = new Semaphore(0);
     private final int cantTerminales;
     private int[] pasajerosABordo;
-    private final AtomicInteger totalSubidos = new AtomicInteger(0);
+    private int totalSubidos;
     private final int capacidad;
     private final CountDownLatch finPasajeros;
-
     private int pasajerosTerminal[];
-    private boolean realizoRecorrido;
-    private Semaphore mutexRecorrido;
     private final Semaphore puedeAbordar;
 
     public TransporteATerminal(int cantidad, int cantidadTerminales, int totalPasajeros) {
@@ -38,12 +33,20 @@ public class TransporteATerminal {
             this.pasajerosTerminal[i] = 0;
         }
         this.finPasajeros = new CountDownLatch(totalPasajeros);
-
-        this.realizoRecorrido = false;
-        this.mutexRecorrido = new Semaphore(1);
         this.puedeAbordar = new Semaphore(cantidad, true);
+        this.totalSubidos = 0;
     }
 
+    // Callback de CyclicBarrier: solo se ejecuta cuando el transporte se LLENA
+    // completamente (capacidad exacta). El último viaje parcial lo maneja
+    // directamente el pasajero que detecta que no hay más gente.
+    private void avisarConductor() {
+        puedeAbordar.drainPermits();
+        Thread conductor = new Thread(new Conductor(this, cantTerminales), "Conductor");
+        conductor.start();
+    }
+
+    // Pasajero sube al transporte
     public void subirATransporte(int numeroTerminal) throws InterruptedException {
         if (numeroTerminal < 1 || numeroTerminal > cantTerminales) {
             throw new IllegalArgumentException("Terminal invalida: " + numeroTerminal);
@@ -56,19 +59,36 @@ public class TransporteATerminal {
 
         mutex.acquire();
         this.pasajerosABordo[numeroTerminal - 1]++;
-        System.out.println(Thread.currentThread().getName() + " sube al transporte");
-        int subidos = totalSubidos.incrementAndGet();
+        totalSubidos++;
+        System.out.println(Thread.currentThread().getName() + " sube al transporte (" + totalSubidos + " subidos)");
         mutex.release();
 
         finPasajeros.countDown();
-        if (subidos % capacidad != 0 && finPasajeros.getCount() == 0) {
-            avisarConductor();
+
+        // Detectar si es el ultimo viaje con carga parcial:
+        // 1) los subidos en este viaje no completan la capacidad
+        // 2) no quedan mas pasajeros por subir al transporte
+        if (totalSubidos % capacidad != 0 && finPasajeros.getCount() == 0) {
+            // SOLO el ultimo pasajero ejecuta esto (porque totalSubidos es mutex-protected)
+            System.out.println(Thread.currentThread().getName()
+                    + " detecto ultimo viaje con carga parcial, arranca conductor");
+
+            // Arrancar el conductor directamente
+            Thread conductor = new Thread(new Conductor(this, cantTerminales), "Conductor Parcial");
+            conductor.start();
+
+            // Dar tiempo a los pasajeros que estan en barrera.await() para que
+            // obtengan BrokenBarrierException, y despues resetear la barrera
+            // para el proximo ciclo.
+            int pasajerosParciales = totalSubidos % capacidad;
             new Thread(() -> {
                 try {
                     Thread.sleep(100);
                     barrera.reset();
-                    inicioUltimoViaje.release(subidos % capacidad);
+                    // Los pasajeros parciales que estaban en await() reciben
+                    // BrokenBarrierException y salen del metodo.
                 } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
                 }
             }).start();
         }
@@ -76,10 +96,12 @@ public class TransporteATerminal {
         try {
             barrera.await();
         } catch (BrokenBarrierException e) {
-            inicioUltimoViaje.acquire();
+            // Viaje parcial: la barrera fue reseteada, el pasajero ya no espera.
+            // Simplemente continua y luego baja en su terminal.
         }
     }
 
+    // Pasajero baja del transporte en la terminal indicada
     public void bajarDelTransporte(int numeroTerminal) throws InterruptedException {
         if (numeroTerminal < 1 || numeroTerminal > cantTerminales) {
             throw new IllegalArgumentException("Terminal invalida: " + numeroTerminal);
@@ -92,14 +114,14 @@ public class TransporteATerminal {
         mutex.acquire();
         try {
             this.pasajerosABordo[numeroTerminal - 1]--;
-            this.pasajerosTerminal[numeroTerminal-1]++;
+            this.pasajerosTerminal[numeroTerminal - 1]++;
         } finally {
             mutex.release();
         }
         maximoPasajeros.release();
     }
 
-    // Lo realiza Chofer del transporte
+    // Lo realiza Conductor: en cada parada libera a los pasajeros de esa terminal
     public void confirmarParada(int parada) throws InterruptedException {
         if (parada < 1 || parada > cantTerminales) {
             throw new IllegalArgumentException("Parada invalida: " + parada);
@@ -116,38 +138,11 @@ public class TransporteATerminal {
         }
     }
 
-    // lo usa chofer, indicando que realizo un recorrido
-    public void terminoRecorrido(){
+    // Lo realiza Conductor: indica que termino el recorrido y libera el transporte
+    // para el proximo viaje
+    public void terminoRecorrido() {
+        System.out.println("Conductor termino recorrido, liberando transporte para proximo viaje");
         puedeAbordar.release(capacidad);
-        try {
-            mutexRecorrido.acquire();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-        realizoRecorrido = true;
-        mutexRecorrido.release();
-    }
-
-    // Lo usa Terminal para saber la cantidad de pasajeros que bajan en una terminal
-    public int getCantidadPasajerosTerminal(int numeroTerminal){
-        int cantidadPasajeros = 0;
-        try {
-            mutexRecorrido.acquire();
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        if (realizoRecorrido) {
-            cantidadPasajeros = this.pasajerosTerminal[numeroTerminal-1];
-        }
-        mutexRecorrido.release();
-        return cantidadPasajeros;
-    }
-
-    private synchronized void avisarConductor() {
-        puedeAbordar.drainPermits();
-        Thread conductor = new Thread(new Conductor(this, cantTerminales), "Conductor");
-        conductor.start();
     }
 
     private String cadenaTerminal(int numeroTerminal) {

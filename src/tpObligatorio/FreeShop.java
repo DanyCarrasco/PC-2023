@@ -14,8 +14,8 @@ public class FreeShop {
     private final Semaphore avisoPasajero;
     private final Semaphore avisoCajero;
 
-    private boolean pagoPendiente = false;
-    private boolean pagoCompletado = false;
+    private boolean pagoPendiente;
+    private boolean pagoCompletado;
 
     private final Semaphore mutex = new Semaphore(1);
     private final Semaphore turnoSalida = new Semaphore(0);
@@ -27,10 +27,14 @@ public class FreeShop {
         this.lugar = new Semaphore(lugar, true);
         this.avisoPasajero = new Semaphore(0);
         this.avisoCajero = new Semaphore(0);
+        this.pagoPendiente = false; // Indica si hay un pasajero esperando para pagar
+        this.pagoCompletado = false; // Indica si el pago ha sido completado por el cajero
     }
 
+    // Pasajero intenta ingresar al Free Shop
     public boolean ingresarFreeShop(long tiempoMaxEspera) {
         try {
+            // Intenta adquirir un lugar en el Free Shop con un tiempo máximo de espera
             if (!lugar.tryAcquire(tiempoMaxEspera, TimeUnit.MILLISECONDS)) {
                 return false;
             }
@@ -40,7 +44,7 @@ public class FreeShop {
         }
 
         try {
-            capacidad.put(Thread.currentThread());
+            capacidad.put(Thread.currentThread()); // Agrega el hilo actual a la cola de capacidad
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             lugar.release();
@@ -49,6 +53,7 @@ public class FreeShop {
         return true;
     }
 
+    // Pasajero compra en el Free Shop
     public void comprarEnFreeShop() {
         System.out.println(Thread.currentThread().getName() + " compra en Free Shop");
         System.out.println(Thread.currentThread().getName() + " avisa a los cajeros que quiere pagar");
@@ -75,6 +80,7 @@ public class FreeShop {
         System.out.println(Thread.currentThread().getName() + " paga y se lleva su producto");
     }
 
+    // Pasajero sale del Free Shop
     public void salirFreeShop() throws InterruptedException {
         Thread yo = Thread.currentThread();
         mutex.acquire();
@@ -97,6 +103,7 @@ public class FreeShop {
                 + " mira los productos y sale del Free Shop de la terminal " + idTerminal);
     }
 
+    // Cajero procesa el pago del pasajero
     public void procesarPago() {
         try {
             avisoPasajero.acquire();
@@ -116,6 +123,7 @@ public class FreeShop {
         }
     }
 
+    // Cajero entrega el ticket de compra al pasajero
     public void entregarTicketCompra() {
         try {
             mutex.acquire();

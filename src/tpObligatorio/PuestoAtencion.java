@@ -34,7 +34,7 @@ public class PuestoAtencion {
         return nombre;
     }
 
-    // ----------- PASAJERO: pedir ingreso -----------
+    // PASAJERO: pedir ingreso
     // Llamado por el pasajero para solicitar ingreso (bloquea hasta que el guardia
     // le dé el permiso)
     public synchronized void puedeEntrarPuesto() throws InterruptedException {
@@ -61,7 +61,7 @@ public class PuestoAtencion {
         System.out.println(Thread.currentThread().getName() + " ingresa al puesto de atencion de " + nombre);
     }
 
-    // ----------- GUARDIA: dar permiso -----------
+    // GUARDIA: dar permiso
     // Llamado por el guardia para permitir la entrada de un pasajero (si hay
     // esperando y cupo)
     public synchronized void permitirIngreso() throws InterruptedException {
@@ -73,7 +73,7 @@ public class PuestoAtencion {
         System.out.println(Thread.currentThread().getName() + " da permiso a un pasajero");
     }
 
-    // ----------- PASAJERO: salir del puesto -----------
+    // PASAJERO: salir del puesto
     // Llamado por el pasajero al salir del puesto
     public synchronized void salirPuesto() {
         activos--;
@@ -82,7 +82,7 @@ public class PuestoAtencion {
         notifyAll(); // despierta al guardia por si estaba esperando cupo
     }
 
-    // ----------- PASAJERO: pedir intercambio de boleto -----------
+    // PASAJERO: pedir intercambio de boleto
     // Intercambio de boleto (usado por pasajero)
     public String[] realizarIntercambio(String[] boletoAvion) throws InterruptedException {
         synchronized (this) {
@@ -107,7 +107,7 @@ public class PuestoAtencion {
         }
     }
 
-    // ----------- TRABAJADOR: entregar boleto -----------
+    // TRABAJADOR: entregar boleto
     // Intercambio desde el empleado del puesto
     public void intercambio() throws InterruptedException {
         synchronized (this) {
@@ -130,8 +130,7 @@ public class PuestoAtencion {
         }
     }
 
-    // ----------- Generación de boleto (no synchronized, solo lee estado)
-    // -----------
+    // Generación de boleto (no synchronized, solo lee estado)
     private void crearBoletoTerminal() {
         String[] boleto = new String[2];
         int numeroTerminal = (int) (Math.random() * cantidadTerminal);

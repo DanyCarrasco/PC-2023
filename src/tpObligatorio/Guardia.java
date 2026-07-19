@@ -11,7 +11,6 @@ public class Guardia implements Runnable {
         try {
             while (true) {
                 puesto.permitirIngreso();
-                // Thread.sleep(5000);
             }
         } catch (InterruptedException e) {
             System.out.println(Thread.currentThread().getName() + " guardia interrumpido");

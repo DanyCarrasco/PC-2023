@@ -1,19 +1,18 @@
 package tpObligatorio;
 
-public class prueba {
+public class Main {
     public static void main(String[] args) {
+        // Se ejecuto el programa con 20 pasajeros, 3 terminales, 2 puestos de ingreso y 2 cajeros por terminal.
+        // Se puede cambiar la cantidad de pasajeros para probar el programa con diferentes escenarios
+
         int cantidadPasajeros = 20;
 
-        //Definicion que se implementa en clase Aeropuerto
-
         Aeropuerto aeropuerto = new Aeropuerto(cantidadPasajeros);
-
         ControlAeropuerto control = new ControlAeropuerto(aeropuerto);
 
         Thread administrador = new Thread(new AdministradorAeropuerto(control), "Administrador del Aeropuerto");
         administrador.start();
 
-        //Se implementan en la clase 'prueba' los empleados
         Thread guardia = new Thread(new Guardia(aeropuerto.entrada.puestos[0]), "Guardia");
         Thread empleadoAtencion = new Thread(new EmpleadoAtencion(aeropuerto.entrada.puestos[0]), "Empleado");
         guardia.start();
