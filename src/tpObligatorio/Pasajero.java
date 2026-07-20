@@ -63,6 +63,7 @@ public class Pasajero implements Runnable {
 
                             // Se espera el llamado de la sala de embarque de la terminal correspondiente
                             aeropuerto.terminales[idxTerminal].sala.esperarLlamado();
+                            aeropuerto.avionDespega.countDown();
                         } else {
                             // Se maneja el caso de terminal inválida
                             System.out.println(Thread.currentThread().getName() + " terminal inválida: " + terminal);

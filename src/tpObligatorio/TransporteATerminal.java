@@ -1,5 +1,6 @@
 package tpObligatorio;
 
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
@@ -7,9 +8,9 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TransporteATerminal {
-    private CyclicBarrier barrera;
+    private final CyclicBarrier barrera;
     private final Semaphore mutex;
-    private final Semaphore maximoPasajeros;
+    private final ArrayBlockingQueue<Boolean> asientos;
     private final Semaphore[] barreraTerminal;
     private final Semaphore inicioUltimoViaje = new Semaphore(0);
     private final int cantTerminales;
@@ -27,7 +28,7 @@ public class TransporteATerminal {
         this.capacidad = cantidad;
         this.barrera = new CyclicBarrier(cantidad, this::avisarConductor);
         this.mutex = new Semaphore(1, true);
-        this.maximoPasajeros = new Semaphore(cantidad, true);
+        this.asientos = new ArrayBlockingQueue<>(cantidad, true);
         this.cantTerminales = cantidadTerminales;
         this.barreraTerminal = new Semaphore[cantidadTerminales];
         this.pasajerosABordo = new int[cantidadTerminales];
@@ -78,7 +79,7 @@ public class TransporteATerminal {
         System.out.println(Thread.currentThread().getName() + " espera para abordar el transporte");
         puedeAbordar.acquire();
         System.out.println(Thread.currentThread().getName() + " intenta subir al transporte");
-        maximoPasajeros.acquire();
+        asientos.put(true);
 
         mutex.acquire();
         this.pasajerosABordo[numeroTerminal - 1]++;
@@ -129,7 +130,7 @@ public class TransporteATerminal {
         } finally {
             mutex.release();
         }
-        maximoPasajeros.release();
+        asientos.poll();
     }
 
     public void confirmarParada(int parada) throws InterruptedException {

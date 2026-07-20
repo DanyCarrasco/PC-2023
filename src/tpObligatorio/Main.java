@@ -11,43 +11,33 @@ public class Main {
         ControlAeropuerto control = new ControlAeropuerto(aeropuerto);
 
         Thread administrador = new Thread(new AdministradorAeropuerto(control), "Administrador del Aeropuerto");
-        //administrador.setDaemon(true);
         administrador.start();
 
         Thread guardia = new Thread(new Guardia(aeropuerto.entrada.puestos[0]), "Guardia");
         Thread empleadoAtencion = new Thread(new EmpleadoAtencion(aeropuerto.entrada.puestos[0]), "Empleado");
-        //guardia.setDaemon(true);
-        //empleadoAtencion.setDaemon(true);
         guardia.start();
         empleadoAtencion.start();
 
         Thread guardia2 = new Thread(new Guardia(aeropuerto.entrada.puestos[1]), "Guardia 2");
         Thread empleadoAtencion2 = new Thread(new EmpleadoAtencion(aeropuerto.entrada.puestos[1]), "Empleado 2");
-        //guardia2.setDaemon(true);
-        //empleadoAtencion2.setDaemon(true);
         guardia2.start();
         empleadoAtencion2.start();
 
         Thread guardia3 = new Thread(new Guardia(aeropuerto.entrada.puestos[2]), "Guardia 3");
         Thread empleadoAtencion3 = new Thread(new EmpleadoAtencion(aeropuerto.entrada.puestos[2]), "Empleado 3");
-        //guardia3.setDaemon(true);
-        //empleadoAtencion3.setDaemon(true);
         guardia3.start();
         empleadoAtencion3.start();
 
         Thread empleadoInforme = new Thread(new EmpleadoInforme(aeropuerto.entrada.informe), "Empleado Informe");
-        //empleadoInforme.setDaemon(true);
         empleadoInforme.start();
         
         Thread[] empleadosSalon= new Thread[3];
         Thread[][] cajeros = new Thread[3][2];
         for (int t = 0; t < cajeros.length; t++) {
             empleadosSalon[t] = new Thread(new EmpleadoSalon(aeropuerto.terminales[t]), "Empleado Salon "+ aeropuerto.terminales[t].getId());
-            //empleadosSalon[t].setDaemon(true);
             empleadosSalon[t].start();
             for (int c = 0; c < 2; c++) {
                 cajeros[t][c] = new Thread(new Cajero(aeropuerto.terminales[t].tienda), "Cajero " + aeropuerto.terminales[t].getId() + "-" + (c + 1));
-                //cajeros[t][c].setDaemon(true);
                 cajeros[t][c].start();
             }
         }
@@ -59,6 +49,16 @@ public class Main {
                     "Pasajero #" + i);
             pasajeros[i].start();
         }
+
+        Thread vuelo = new Thread(() -> {
+            try {
+                aeropuerto.avionDespega.await();
+                System.out.println("=== EL AVION DESPEGA CON TODOS LOS PASAJEROS A BORDO ===");
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }, "Vuelo");
+        vuelo.start();
     }
 
 }
