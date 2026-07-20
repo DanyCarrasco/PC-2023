@@ -4,12 +4,14 @@ import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TransporteATerminal {
     private CyclicBarrier barrera;
     private final Semaphore mutex;
     private final Semaphore maximoPasajeros;
     private final Semaphore[] barreraTerminal;
+    private final Semaphore inicioUltimoViaje = new Semaphore(0);
     private final int cantTerminales;
     private int[] pasajerosABordo;
     private int totalSubidos;
@@ -17,6 +19,9 @@ public class TransporteATerminal {
     private final CountDownLatch finPasajeros;
     private int pasajerosTerminal[];
     private final Semaphore puedeAbordar;
+    private final AtomicBoolean conductorSpawning = new AtomicBoolean(false);
+    private volatile boolean aeropuertoCerrado = false;
+    private Thread monitorAeropuerto;
 
     public TransporteATerminal(int cantidad, int cantidadTerminales, int totalPasajeros) {
         this.capacidad = cantidad;
@@ -35,18 +40,36 @@ public class TransporteATerminal {
         this.finPasajeros = new CountDownLatch(totalPasajeros);
         this.puedeAbordar = new Semaphore(cantidad, true);
         this.totalSubidos = 0;
+        this.monitorAeropuerto = null;
     }
 
-    // Callback de CyclicBarrier: solo se ejecuta cuando el transporte se LLENA
-    // completamente (capacidad exacta). El último viaje parcial lo maneja
-    // directamente el pasajero que detecta que no hay más gente.
     private void avisarConductor() {
-        puedeAbordar.drainPermits();
-        Thread conductor = new Thread(new Conductor(this, cantTerminales), "Conductor");
-        conductor.start();
+        if (conductorSpawning.compareAndSet(false, true)) {
+            System.out.println("Barrera completa, arrancando conductor");
+            puedeAbordar.drainPermits();
+            Thread conductor = new Thread(new Conductor(this, cantTerminales), "Conductor");
+            conductor.start();
+        }
     }
 
-    // Pasajero sube al transporte
+    public void notificarAeropuertoCerrado() {
+        this.aeropuertoCerrado = true;
+        // Arrancar thread monitor que rompa la barrera si hay pasajeros esperando
+        if (monitorAeropuerto == null || !monitorAeropuerto.isAlive()) {
+            monitorAeropuerto = new Thread(() -> {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    return;
+                }
+                System.out.println("Monitor: aeropuerto cerrado, reseteando barrera");
+                barrera.reset();
+            }, "Monitor Aeropuerto Cerrado");
+            monitorAeropuerto.start();
+        }
+    }
+
     public void subirATransporte(int numeroTerminal) throws InterruptedException {
         if (numeroTerminal < 1 || numeroTerminal > cantTerminales) {
             throw new IllegalArgumentException("Terminal invalida: " + numeroTerminal);
@@ -60,48 +83,36 @@ public class TransporteATerminal {
         mutex.acquire();
         this.pasajerosABordo[numeroTerminal - 1]++;
         totalSubidos++;
-        System.out.println(Thread.currentThread().getName() + " sube al transporte (" + totalSubidos + " subidos)");
+        int subidosSnapshot = totalSubidos;
+        System.out.println(Thread.currentThread().getName()
+                + " sube al transporte (" + subidosSnapshot + " subidos)");
         mutex.release();
 
         finPasajeros.countDown();
 
-        // Detectar si es el ultimo viaje con carga parcial:
-        // 1) los subidos en este viaje no completan la capacidad
-        // 2) no quedan mas pasajeros por subir al transporte
-        if (totalSubidos % capacidad != 0 && finPasajeros.getCount() == 0) {
-            // SOLO el ultimo pasajero ejecuta esto (porque totalSubidos es mutex-protected)
-            System.out.println(Thread.currentThread().getName()
-                    + " detecto ultimo viaje con carga parcial, arranca conductor");
-
-            // Arrancar el conductor directamente
-            Thread conductor = new Thread(new Conductor(this, cantTerminales), "Conductor Parcial");
-            conductor.start();
-
-            // Dar tiempo a los pasajeros que estan en barrera.await() para que
-            // obtengan BrokenBarrierException, y despues resetear la barrera
-            // para el proximo ciclo.
-            int pasajerosParciales = totalSubidos % capacidad;
-            new Thread(() -> {
-                try {
-                    Thread.sleep(100);
-                    barrera.reset();
-                    // Los pasajeros parciales que estaban en await() reciben
-                    // BrokenBarrierException y salen del metodo.
-                } catch (InterruptedException ex) {
-                    Thread.currentThread().interrupt();
-                }
-            }).start();
-        }
-
         try {
             barrera.await();
         } catch (BrokenBarrierException e) {
-            // Viaje parcial: la barrera fue reseteada, el pasajero ya no espera.
-            // Simplemente continua y luego baja en su terminal.
+            // La barrera fue reseteada (por monitor de cierre o viaje parcial).
+            // Verificar si es viaje parcial y arrancar conductor si hace falta.
+            if (subidosSnapshot % capacidad != 0
+                    && (finPasajeros.getCount() == 0 || aeropuertoCerrado)) {
+                if (conductorSpawning.compareAndSet(false, true)) {
+                    System.out.println(Thread.currentThread().getName()
+                            + " detecto viaje parcial (" + subidosSnapshot
+                            + "/" + capacidad + "), arranca conductor");
+                    Thread conductor = new Thread(
+                            new Conductor(this, cantTerminales), "Conductor Parcial");
+                    conductor.start();
+                }
+            }
+            // Esperar a que el conductor termine y libere el transporte
+            System.out.println(Thread.currentThread().getName()
+                    + " barrera rota, esperando turno para bajar");
+            inicioUltimoViaje.acquire();
         }
     }
 
-    // Pasajero baja del transporte en la terminal indicada
     public void bajarDelTransporte(int numeroTerminal) throws InterruptedException {
         if (numeroTerminal < 1 || numeroTerminal > cantTerminales) {
             throw new IllegalArgumentException("Terminal invalida: " + numeroTerminal);
@@ -121,7 +132,6 @@ public class TransporteATerminal {
         maximoPasajeros.release();
     }
 
-    // Lo realiza Conductor: en cada parada libera a los pasajeros de esa terminal
     public void confirmarParada(int parada) throws InterruptedException {
         if (parada < 1 || parada > cantTerminales) {
             throw new IllegalArgumentException("Parada invalida: " + parada);
@@ -138,11 +148,11 @@ public class TransporteATerminal {
         }
     }
 
-    // Lo realiza Conductor: indica que termino el recorrido y libera el transporte
-    // para el proximo viaje
     public void terminoRecorrido() {
         System.out.println("Conductor termino recorrido, liberando transporte para proximo viaje");
+        conductorSpawning.set(false);
         puedeAbordar.release(capacidad);
+        inicioUltimoViaje.release(capacidad);
     }
 
     private String cadenaTerminal(int numeroTerminal) {

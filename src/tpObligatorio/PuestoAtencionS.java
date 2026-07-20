@@ -33,6 +33,14 @@ public class PuestoAtencionS {
         capacidad.release();
     }
 
+    // Metodo compatible con Guardia.java: el control de capacidad ya lo maneja
+    // el Semaphore, asi que este metodo es un no-op. Se mantiene para que
+    // Guardia pueda crear threads sin errores de compilacion.
+    public void permitirIngreso() throws InterruptedException {
+        // No-op: el Semaphore de capacidad controla el ingreso
+        Thread.sleep(100); // evitar busy-loop
+    }
+
     // Intercambio de boleto (usado por pasajero)
     public String[] realizarIntercambio(String[] boletoAvion) throws InterruptedException {
         synchronized (this) {

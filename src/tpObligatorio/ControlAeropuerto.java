@@ -33,7 +33,6 @@ public class ControlAeropuerto {
     }
 
     // Pasajero intenta entrar al aeropuerto. Retorna true si entro, false si esta cerrado.
-    // La lectura de abierto se hace DENTRO del lock, eliminando la race condition.
     public boolean entrarAlAeropuerto() {
         lock.lock();
         try {
@@ -50,7 +49,9 @@ public class ControlAeropuerto {
         }
     }
 
-    // Administrador cierra el aeropuerto despues de un tiempo
+    // Administrador cierra el aeropuerto despues de un tiempo.
+    // Solo bloquea el ingreso de nuevos pasajeros. Los que ya entraron
+    // continuan su rutina normalmente.
     public void cerrarAeropuerto() {
         lock.lock();
         try {
@@ -58,7 +59,8 @@ public class ControlAeropuerto {
             abierto = false;
             System.out.println(Thread.currentThread().getName()
                     + " cierra ingreso de pasajeros al aeropuerto VIAJE BONITO");
-            pasajeros.signalAll();
+            // Notificar al transporte que el aeropuerto cerro (para viajes parciales)
+            aeropuerto.transporte.notificarAeropuertoCerrado();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         } finally {
