@@ -10,7 +10,7 @@ public class Pasajero implements Runnable {
 
     public Pasajero(ControlAeropuerto control, Aeropuerto aeropuerto, boolean comprar) {
         this.boletoAvion = new String[1];
-        boletoAvion[0] = "Compañia 1";
+        boletoAvion[0] = "Boleto de avion";
         this.boletoTerminal = new String[0];
         this.aeropuerto = aeropuerto;
         this.control = control;
@@ -41,6 +41,7 @@ public class Pasajero implements Runnable {
                                 + boletoTerminal[0] + ", en el puesto de embarque " + boletoTerminal[1]);
 
                         int terminal = numeroTerminal();
+                        // Se verifica que la terminal sea válida antes de intentar subir al transporte y entrar al Free Shop
                         if (terminal >= 1 && terminal <= aeropuerto.terminales.length) {
                             int idxTerminal = terminal - 1; // Ajuste para índice de arreglo (0-based)
                             aeropuerto.transporte.subirATransporte(terminal);

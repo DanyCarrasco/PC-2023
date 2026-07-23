@@ -5,29 +5,34 @@ import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TransporteATerminal {
-    private final CyclicBarrier barrera;
-    private final Semaphore mutex;
-    private final ArrayBlockingQueue<Boolean> asientos;
-    private final Semaphore[] barreraTerminal;
-    private final Semaphore inicioUltimoViaje = new Semaphore(0);
-    private final int cantTerminales;
+    private CyclicBarrier barrera;
+    private ArrayBlockingQueue<Boolean> asientos;
+
+    private Semaphore mutex;
+    private Semaphore mutexArranque;
+    private Semaphore mutexAeropuerto;
+    private Semaphore[] barreraTerminal;
+    private Semaphore inicioUltimoViaje = new Semaphore(0);
+
+    private int cantTerminales;
     private int[] pasajerosABordo;
     private int totalSubidos;
-    private final int capacidad;
-    private final CountDownLatch finPasajeros;
+    private int capacidad;
+    private CountDownLatch finPasajeros;
     private int pasajerosTerminal[];
-    private final Semaphore puedeAbordar;
-    private final AtomicBoolean conductorSpawning = new AtomicBoolean(false);
-    private volatile boolean aeropuertoCerrado = false;
-    private Thread monitorAeropuerto;
+    private Semaphore puedeAbordar;
+    private boolean conductorArrancado = false;
+    private boolean aeropuertoCerrado = false;
 
     public TransporteATerminal(int cantidad, int cantidadTerminales, int totalPasajeros) {
         this.capacidad = cantidad;
         this.barrera = new CyclicBarrier(cantidad, this::avisarConductor);
         this.mutex = new Semaphore(1, true);
+        this.mutexArranque = new Semaphore(1, true);
+        this.mutexAeropuerto = new Semaphore(1, true);
+
         this.asientos = new ArrayBlockingQueue<>(cantidad, true);
         this.cantTerminales = cantidadTerminales;
         this.barreraTerminal = new Semaphore[cantidadTerminales];
@@ -41,33 +46,18 @@ public class TransporteATerminal {
         this.finPasajeros = new CountDownLatch(totalPasajeros);
         this.puedeAbordar = new Semaphore(cantidad, true);
         this.totalSubidos = 0;
-        this.monitorAeropuerto = null;
-    }
-
-    private void avisarConductor() {
-        if (conductorSpawning.compareAndSet(false, true)) {
-            System.out.println("Barrera completa, arrancando conductor");
-            puedeAbordar.drainPermits();
-            Thread conductor = new Thread(new Conductor(this, cantTerminales), "Conductor");
-            conductor.start();
-        }
     }
 
     public void notificarAeropuertoCerrado() {
-        this.aeropuertoCerrado = true;
-        // Arrancar thread monitor que rompa la barrera si hay pasajeros esperando
-        if (monitorAeropuerto == null || !monitorAeropuerto.isAlive()) {
-            monitorAeropuerto = new Thread(() -> {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    return;
-                }
-                System.out.println("Monitor: aeropuerto cerrado, reseteando barrera");
-                barrera.reset();
-            }, "Monitor Aeropuerto Cerrado");
-            monitorAeropuerto.start();
+        try {
+            mutexAeropuerto.acquire();
+            aeropuertoCerrado = true;
+            barrera.reset(); // Rompe la barrera para que los pasajeros que ya subieron puedan bajar
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } finally {
+            mutexAeropuerto.release();
         }
     }
 
@@ -84,9 +74,9 @@ public class TransporteATerminal {
         mutex.acquire();
         this.pasajerosABordo[numeroTerminal - 1]++;
         totalSubidos++;
-        int subidosSnapshot = totalSubidos;
+        int subidosAhora = totalSubidos;
         System.out.println(Thread.currentThread().getName()
-                + " sube al transporte (" + subidosSnapshot + " subidos)");
+                + " sube al transporte (" + subidosAhora + " subidos)");
         mutex.release();
 
         finPasajeros.countDown();
@@ -96,18 +86,18 @@ public class TransporteATerminal {
         } catch (BrokenBarrierException e) {
             // La barrera fue reseteada (por monitor de cierre o viaje parcial).
             // Verificar si es viaje parcial y arrancar conductor si hace falta.
-            if (subidosSnapshot % capacidad != 0
+            if (subidosAhora % capacidad != 0
                     && (finPasajeros.getCount() == 0 || aeropuertoCerrado)) {
-                if (conductorSpawning.compareAndSet(false, true)) {
+                if (intentarConductor()) {
                     System.out.println(Thread.currentThread().getName()
-                            + " detecto viaje parcial (" + subidosSnapshot
+                            + " detecto viaje parcial (" + subidosAhora
                             + "/" + capacidad + "), arranca conductor");
                     Thread conductor = new Thread(
                             new Conductor(this, cantTerminales), "Conductor Parcial");
                     conductor.start();
                 }
             }
-            // Esperar a que el conductor termine y libere el transporte
+            // Espera a que el conductor termine y libere el transporte
             System.out.println(Thread.currentThread().getName()
                     + " barrera rota, esperando turno para bajar");
             inicioUltimoViaje.acquire();
@@ -151,9 +141,41 @@ public class TransporteATerminal {
 
     public void terminoRecorrido() {
         System.out.println("Conductor termino recorrido, liberando transporte para proximo viaje");
-        conductorSpawning.set(false);
-        puedeAbordar.release(capacidad);
-        inicioUltimoViaje.release(capacidad);
+        try {
+            mutexArranque.acquire();
+            conductorArrancado = false;
+        } catch (InterruptedException e) {
+            // TODO: handle exception
+        } finally {
+            mutexArranque.release();
+            puedeAbordar.release(capacidad);
+            inicioUltimoViaje.release(capacidad);
+        }
+    }
+
+    private boolean intentarConductor() {
+        boolean intento = false;
+        try {
+            mutexArranque.acquire();
+            if (!conductorArrancado) {
+                conductorArrancado = true;
+                intento = true;
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } finally {
+            mutexArranque.release();
+        }
+        return intento;
+    }
+
+    private void avisarConductor() {
+        // Si el aeropuerto esta cerrado, no arrancar conductor, porque ya hay uno en proceso
+        if (intentarConductor()) {
+            puedeAbordar.drainPermits(); // Bloquea abordaje de nuevos pasajeros hasta que el conductor termine
+            Thread conductor = new Thread(new Conductor(this, cantTerminales), "Conductor");
+            conductor.start();
+        }
     }
 
     private String cadenaTerminal(int numeroTerminal) {

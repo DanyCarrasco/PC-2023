@@ -50,14 +50,7 @@ public class Main {
             pasajeros[i].start();
         }
 
-        Thread vuelo = new Thread(() -> {
-            try {
-                aeropuerto.avionDespega.await();
-                System.out.println("=== EL AVION DESPEGA CON TODOS LOS PASAJEROS A BORDO ===");
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        }, "Vuelo");
+        Thread vuelo = new Thread(new Vuelo(aeropuerto), "Vuelo");
         vuelo.start();
     }
 
