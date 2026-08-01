@@ -7,6 +7,7 @@ public class PuestoAtencion {
     private int cantidadTerminal;
     private int[][] tamanioPE; // PE: Puertos de Embarques
     private int permisosPendientes;
+    private Terminal[] terminales;
 
     // Capacidad máxima de pasajeros simultáneos (lo único que justifica un
     // contador)
@@ -16,17 +17,21 @@ public class PuestoAtencion {
     private int esperando; // pasajeros esperando permiso del guardia
 
     private boolean intercambioEnCurso = false;
+    private int solicitudes = 0; // pasajeros que pidieron un boleto
+    private int atendidas = 0; // boletos creados por el empleado
     private final Exchanger<String[]> exchanger = new Exchanger<>();
     private String[] boletoTerminal;
 
-    public PuestoAtencion(String nombre, int cantidadMaxima, int cantidadTerminales, int[][] tamanioPE) {
+    public PuestoAtencion(String nombre, int cantidadMaxima, int cantidadTerminales, int[][] tamanioPE,
+            Terminal[] terminales) {
         this.nombre = nombre;
         this.cantidadTerminal = cantidadTerminales;
         this.tamanioPE = tamanioPE;
+        this.terminales = terminales;
         this.maxPasajeros = cantidadMaxima;
         this.activos = 0;
         this.esperando = 0;
-        this.boletoTerminal = new String[2];
+        this.boletoTerminal = new String[3];
         this.permisosPendientes = 0;
     }
 
@@ -93,6 +98,7 @@ public class PuestoAtencion {
                 wait();
             }
             System.out.println(Thread.currentThread().getName() + " solicita intercambio");
+            solicitudes++;
             intercambioEnCurso = true;
             notifyAll();
         }
@@ -112,10 +118,11 @@ public class PuestoAtencion {
     public void intercambio() throws InterruptedException {
         synchronized (this) {
             System.out.println(Thread.currentThread().getName() + " esperando intercambio");
-            // Espera hasta que un pasajero haya pedido intercambio
-            while (!intercambioEnCurso) {
+            // Espera hasta que un pasajero haya pedido intercambio sin ser atendido
+            while (solicitudes == atendidas) {
                 wait();
             }
+            atendidas++;
             System.out.println(Thread.currentThread().getName() + " despertó");
             System.out.println(Thread.currentThread().getName()
                     + " entrega un boleto de terminal a un pasajero");
@@ -132,13 +139,14 @@ public class PuestoAtencion {
 
     // Generación de boleto (no synchronized, solo lee estado)
     private void crearBoletoTerminal() {
-        String[] boleto = new String[2];
+        String[] boleto = new String[3];
         int numeroTerminal = (int) (Math.random() * cantidadTerminal);
         boleto[0] = Character.toString((char) ('A' + numeroTerminal));
         int puertoTerminal = (int) (Math.random()
                 * (tamanioPE[numeroTerminal][1] - tamanioPE[numeroTerminal][0] + 1))
                 + tamanioPE[numeroTerminal][0];
         boleto[1] = Integer.toString(puertoTerminal);
+        boleto[2] = terminales[numeroTerminal].asignarVuelo();
         this.boletoTerminal = boleto;
     }
 }

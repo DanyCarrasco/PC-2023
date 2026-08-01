@@ -8,11 +8,11 @@ public class IngresoAeropuerto {
 
     public PuestoInformes informe;
 
-    public IngresoAeropuerto(int cantidadMaxima) {
+    public IngresoAeropuerto(int cantidadMaxima, Terminal[] terminales) {
         this.cantMaxima = cantidadMaxima;
         definirPuertosEmbarque();
         iniciarNombresLineas();
-        iniciarPuestosAtencion();
+        iniciarPuestosAtencion(terminales);
         informe = new PuestoInformes(puestos);
     }
 
@@ -33,10 +33,10 @@ public class IngresoAeropuerto {
         nombresLineas[2] = "JetSMART";
     }
 
-    private void iniciarPuestosAtencion() {
+    private void iniciarPuestosAtencion(Terminal[] terminales) {
         this.puestos = new PuestoAtencion[nombresLineas.length];
         for (int i = 0; i < nombresLineas.length; i++) {
-            puestos[i] = new PuestoAtencion(this.nombresLineas[i], cantMaxima, 3, tamanioPE);
+            puestos[i] = new PuestoAtencion(this.nombresLineas[i], cantMaxima, 3, tamanioPE, terminales);
         }
     }
 }

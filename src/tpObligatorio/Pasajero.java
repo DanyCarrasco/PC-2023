@@ -63,7 +63,13 @@ public class Pasajero implements Runnable {
                             }
 
                             // Se espera el llamado de la sala de embarque de la terminal correspondiente
-                            aeropuerto.terminales[idxTerminal].sala.esperarLlamado();
+                            String nombreVuelo = boletoTerminal[2];
+                            boolean subioAlVuelo = aeropuerto.terminales[idxTerminal].sala
+                                    .esperarLlamado(nombreVuelo);
+                            if (!subioAlVuelo) {
+                                System.out.println(Thread.currentThread().getName()
+                                        + " PERDIO SU VUELO " + nombreVuelo + " (el vuelo ya despego)");
+                            }
                         } else {
                             // Se maneja el caso de terminal inválida
                             System.out.println(Thread.currentThread().getName() + " terminal inválida: " + terminal);

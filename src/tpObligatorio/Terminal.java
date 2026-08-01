@@ -14,4 +14,8 @@ public class Terminal {
     public String getId() {
         return id;
     }
+
+    public String asignarVuelo() {
+        return sala.asignarVuelo();
+    }
 }

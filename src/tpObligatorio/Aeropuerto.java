@@ -8,8 +8,8 @@ public class Aeropuerto {
     public Aeropuerto(int cantidadPasajeros) {
         terminales = new Terminal[3];
         transporte = new TransporteATerminal(5, 3, cantidadPasajeros); 
-        entrada = new IngresoAeropuerto(2);
         iniciarTerminales();
+        entrada = new IngresoAeropuerto(2, terminales);
     }
 
     private void iniciarTerminales() {
