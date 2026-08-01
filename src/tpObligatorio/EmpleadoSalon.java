@@ -11,7 +11,8 @@ public class EmpleadoSalon implements Runnable {
         try {
             while (true) {
                 embarques.sala.esperarPasajero();
-                embarques.sala.llamarAEmbarcar();
+                Vuelo vuelo = embarques.sala.llamarAEmbarcar();
+                new Thread(vuelo, vuelo.getNombreVuelo()).start();
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

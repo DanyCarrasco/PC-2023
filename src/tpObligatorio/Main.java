@@ -5,7 +5,7 @@ public class Main {
         // Se ejecuto el programa con 20 pasajeros, 3 terminales, 2 puestos de ingreso y 2 cajeros por terminal.
         // Se puede cambiar la cantidad de pasajeros para probar el programa con diferentes escenarios
 
-        int cantidadPasajeros = 20;
+        int cantidadPasajeros = 50;
 
         Aeropuerto aeropuerto = new Aeropuerto(cantidadPasajeros);
         ControlAeropuerto control = new ControlAeropuerto(aeropuerto);
@@ -49,9 +49,6 @@ public class Main {
                     "Pasajero #" + i);
             pasajeros[i].start();
         }
-
-        Thread vuelo = new Thread(new Vuelo(aeropuerto), "Vuelo");
-        vuelo.start();
     }
 
 }

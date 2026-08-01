@@ -20,7 +20,7 @@ public class Pasajero implements Runnable {
     public void run() {
         System.out.println(Thread.currentThread().getName() + " intenta ingresar al aeropuerto VIAJE BONITO");
         boolean entro = control.entrarAlAeropuerto();
-            //Si entra al aeropuerto, se dirige a un puesto de atencion de una aerolinea
+            // Si entra al aeropuerto, se dirige a un puesto de atencion de una aerolinea
             if (entro) {
                 puesto = aeropuerto.entrada.informe.llegarAInforme();
             // Si el puesto de atencion no es nulo, se procede a realizar el intercambio de boleto y continua
@@ -64,7 +64,6 @@ public class Pasajero implements Runnable {
 
                             // Se espera el llamado de la sala de embarque de la terminal correspondiente
                             aeropuerto.terminales[idxTerminal].sala.esperarLlamado();
-                            aeropuerto.avionDespega.countDown();
                         } else {
                             // Se maneja el caso de terminal inválida
                             System.out.println(Thread.currentThread().getName() + " terminal inválida: " + terminal);

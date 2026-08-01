@@ -11,7 +11,7 @@ public class ControlAeropuerto {
     private Condition administrador, pasajeros;
     private boolean abierto;
     // Tiempo que el administrador espera antes de cerrar (simula las 6:00-22:00)
-    private static final int TIEMPO_ABIERTO_SEGUNDOS = 30;
+    private static final int TIEMPO_ABIERTO_SEGUNDOS = 1;
 
     public ControlAeropuerto(Aeropuerto aeropuerto) {
         this.aeropuerto = aeropuerto;
@@ -50,8 +50,7 @@ public class ControlAeropuerto {
     }
 
     // Administrador cierra el aeropuerto despues de un tiempo.
-    // Solo bloquea el ingreso de nuevos pasajeros. Los que ya entraron
-    // continuan su rutina normalmente.
+    // Solo bloquea el ingreso de nuevos pasajeros. Los que ya entraron continuan su rutina normalmente.
     public void cerrarAeropuerto() {
         lock.lock();
         try {

@@ -1,18 +1,14 @@
 package tpObligatorio;
 
-import java.util.concurrent.CountDownLatch;
-
 public class Aeropuerto {
     public Terminal[] terminales;
     public TransporteATerminal transporte;
     public IngresoAeropuerto entrada;
-    public CountDownLatch avionDespega;
 
     public Aeropuerto(int cantidadPasajeros) {
         terminales = new Terminal[3];
         transporte = new TransporteATerminal(5, 3, cantidadPasajeros); 
         entrada = new IngresoAeropuerto(2);
-        avionDespega = new CountDownLatch(cantidadPasajeros);
         iniciarTerminales();
     }
 
