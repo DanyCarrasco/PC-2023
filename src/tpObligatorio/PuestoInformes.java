@@ -13,7 +13,7 @@ public class PuestoInformes {
     // hasta que sale completamente). Evita que un pasajero nuevo se cuelen en la cola
     // de procesado antes de que el anterior haya salido.
     private boolean ocupado = false;
-    // atendiendo: true cuando el employee esta procesando activamente a un pasajero
+    // atendiendo: true cuando el empleado esta procesando activamente a un pasajero
     private boolean atendiendo = false;
     private PuestoAtencion puestoAsignado;
 

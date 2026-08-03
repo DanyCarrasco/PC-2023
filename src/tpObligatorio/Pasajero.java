@@ -20,10 +20,11 @@ public class Pasajero implements Runnable {
     public void run() {
         System.out.println(Thread.currentThread().getName() + " intenta ingresar al aeropuerto VIAJE BONITO");
         boolean entro = control.entrarAlAeropuerto();
-            // Si entra al aeropuerto, se dirige a un puesto de atencion de una aerolinea
-            if (entro) {
-                puesto = aeropuerto.entrada.informe.llegarAInforme();
-            // Si el puesto de atencion no es nulo, se procede a realizar el intercambio de boleto y continua
+        // Si entra al aeropuerto, se dirige a un puesto de atencion de una aerolinea
+        if (entro) {
+            puesto = aeropuerto.entrada.informe.llegarAInforme();
+            // Si el puesto de atencion no es nulo, se procede a realizar el intercambio de
+            // boleto y continua
             if (puesto != null) {
                 try {
                     puesto.puedeEntrarPuesto();
@@ -32,7 +33,8 @@ public class Pasajero implements Runnable {
 
                     puesto.salirPuesto();
 
-                    // Si el boletoTerminal tiene datos, se procede a ir a la terminal correspondiente
+                    // Si el boletoTerminal tiene datos, se procede a ir a la terminal
+                    // correspondiente
                     if (boletoTerminal.length == 0) {
                         System.out.println(
                                 "Error de " + Thread.currentThread().getName() + ": el boleto no tiene ningun dato");
@@ -41,13 +43,15 @@ public class Pasajero implements Runnable {
                                 + boletoTerminal[0] + ", en el puesto de embarque " + boletoTerminal[1]);
 
                         int terminal = numeroTerminal();
-                        // Se verifica que la terminal sea válida antes de intentar subir al transporte y entrar al Free Shop
+                        // Se verifica que la terminal sea válida antes de intentar subir al transporte
+                        // y entrar al Free Shop
                         if (terminal >= 1 && terminal <= aeropuerto.terminales.length) {
                             int idxTerminal = terminal - 1; // Ajuste para índice de arreglo (0-based)
                             aeropuerto.transporte.subirATransporte(terminal);
                             aeropuerto.transporte.bajarDelTransporte(terminal);
 
-                            // Se intenta ingresar al Free Shop de la terminal correspondiente, con un tiempo máximo de espera
+                            // Se intenta ingresar al Free Shop de la terminal correspondiente, con un
+                            // tiempo máximo de espera
                             long tiempoRestante = 30000;
                             long tiempoMaxEspera = tiempoRestante - 15000;
                             if (aeropuerto.terminales[idxTerminal].tienda.ingresarFreeShop(tiempoMaxEspera)) {
@@ -66,7 +70,9 @@ public class Pasajero implements Runnable {
                             String nombreVuelo = boletoTerminal[2];
                             boolean subioAlVuelo = aeropuerto.terminales[idxTerminal].sala
                                     .esperarLlamado(nombreVuelo);
-                            if (!subioAlVuelo) {
+                            if (subioAlVuelo) {
+                                System.out.println(Thread.currentThread().getName() + " subio al vuelo " + nombreVuelo);
+                            } else {
                                 System.out.println(Thread.currentThread().getName()
                                         + " PERDIO SU VUELO " + nombreVuelo + " (el vuelo ya despego)");
                             }
@@ -82,14 +88,15 @@ public class Pasajero implements Runnable {
                     System.out.println(Thread.currentThread().getName() + " error: " + e.getMessage());
                 }
             } else {
-                // Si el puesto de atencion es nulo, se indica que no pudo ser derivado a un puesto de atencion de una aerolinea
+                // Si el puesto de atencion es nulo, se indica que no pudo ser derivado a un
+                // puesto de atencion de una aerolinea
                 System.out.println(Thread.currentThread().getName()
                         + " no pudo ser derivado a un puesto de atencion de una aerolinea");
             }
         } else {
             // Si no entra al aeropuerto, se indica que no pudo ingresar porque está cerrado
-            System.out.println(Thread.currentThread().getName() + " no pudo ingresar al aeropuerto porque esta CERRADO"
-            );
+            System.out
+                    .println(Thread.currentThread().getName() + " no pudo ingresar al aeropuerto porque esta CERRADO");
         }
     }
 

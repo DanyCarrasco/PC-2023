@@ -2,22 +2,24 @@ package tpObligatorio;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class Vuelo implements Runnable {
-    private static final long TIEMPO_ESPERA_EMBARQUE = 5000;
-    private final String nombreVuelo;
-    private final int capacidad;
-    private final CountDownLatch asientos;
-    private final AtomicInteger abordo = new AtomicInteger(0);
-    private final AtomicInteger asignados = new AtomicInteger(0);
-    private volatile boolean activado = false;
-    private volatile boolean despego = false;
+    private long TIEMPO_ESPERA_EMBARQUE = 5000;
+    private String nombreVuelo;
+    private int capacidad;
+    // Asientos que aún no fueron ocupados (abordo = capacidad - getCount()).
+    private CountDownLatch asientos;
+    // Asientos que aún no fueron asignados (asignados = capacidad - getCount()).
+    private CountDownLatch asientosAsignados;
+    // Eventos de una sola vez: llamada a embarcar y despegue.
+    private CountDownLatch activado = new CountDownLatch(1);
+    private CountDownLatch despego = new CountDownLatch(1);
 
     public Vuelo(int capacidad, String nombreVuelo) {
         this.capacidad = capacidad;
         this.nombreVuelo = nombreVuelo;
         this.asientos = new CountDownLatch(capacidad);
+        this.asientosAsignados = new CountDownLatch(capacidad);
     }
 
     public String getNombreVuelo() {
@@ -25,41 +27,43 @@ public class Vuelo implements Runnable {
     }
 
     public boolean estaActivado() {
-        return activado;
+        return activado.getCount() == 0;
     }
 
     public boolean haDespegado() {
-        return despego;
+        return despego.getCount() == 0;
     }
 
     public void activar() {
-        activado = true;
+        activado.countDown();
     }
 
     public void asignarPasajero() {
-        asignados.incrementAndGet();
+        asientosAsignados.countDown();
     }
 
     public boolean abordar() {
-        if (!despego && asientos.getCount() > 0) {
+        boolean abordo = false;
+        if (!haDespegado() && asientos.getCount() > 0) {
             asientos.countDown();
-            abordo.incrementAndGet();
-            return true;
+            abordo = true;
         }
-        return false;
+        return abordo;
     }
 
     public void run() {
         try {
             System.out.println("*** " + Thread.currentThread().getName() + " LLAMA A EMBARCAR ***");
             asientos.await(TIEMPO_ESPERA_EMBARQUE, TimeUnit.MILLISECONDS);
-            despego = true;
-            if (abordo.get() >= asignados.get()) {
+            despego.countDown();
+            int abordo = capacidad - (int) asientos.getCount();
+            int asignados = capacidad - (int) asientosAsignados.getCount();
+            if (abordo >= asignados) {
                 System.out.println("El vuelo " + nombreVuelo + " DESPEGA CON TODOS SUS PASAJEROS A BORDO");
             } else {
                 System.out.println("El vuelo " + nombreVuelo + " DESPEGA A HORARIO con "
-                        + abordo.get() + " de " + asignados.get()
-                        + " pasajeros a bordo (" + (asignados.get() - abordo.get())
+                        + abordo + " de " + asignados
+                        + " pasajeros a bordo (" + (asignados - abordo)
                         + " perdieron el vuelo)");
             }
         } catch (InterruptedException e) {

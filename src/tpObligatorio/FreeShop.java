@@ -18,7 +18,7 @@ public class FreeShop {
     }
 
     public synchronized boolean ingresarFreeShop(long tiempoMaxEspera) {
-        boolean ingresoExitoso = true;;
+        boolean ingresoExitoso = true;
         long tiempoLimite = System.currentTimeMillis() + tiempoMaxEspera;
         while (contador >= capacidadMax) {
             long restante = tiempoLimite - System.currentTimeMillis();
